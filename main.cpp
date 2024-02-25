@@ -4,9 +4,9 @@
 #include <SDL2/SDL_rect.h>
 #include <SDL2/SDL_render.h>
 #include <cstdio>
-#include <iostream>
-#include <memory>
+#include <vector>
 
+// TODO: use SDL functions with unique_ptr
 SDL_Window *gWindow;
 SDL_Renderer *gRenderer;
 
@@ -32,6 +32,84 @@ class Pacman {
     int velocity_x;
     int velocity_y;
 };
+
+class Box {
+  public:
+    static constexpr int size = Pacman::height;
+    enum class Type : int8_t { wall, point, super_point, empty };
+
+    void render(int x, int y);
+    void setType(Box::Type t) { type_ = t; };
+    Type getType() const { return type_; }
+
+  private:
+    Type type_;
+};
+
+void Box::render(int x, int y) {
+    SDL_Rect r{x, y, size, size};
+
+    switch (type_) {
+    case Type::super_point:
+        SDL_SetRenderDrawColor(gRenderer, 0xFF, 0, 0, 0xFF);
+        break;
+    case Type::wall:
+        SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 0xFF);
+        break;
+    case Type::point:
+        SDL_SetRenderDrawColor(gRenderer, 0, 0xFF, 0, 0xFF);
+        break;
+    case Type::empty:
+        SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xF);
+        break;
+    }
+
+    SDL_RenderFillRect(gRenderer, &r);
+};
+
+class Board {
+  public:
+    Board(int w, int h) : rows_(h), columns_(h), board_(w * h) {
+        for (int i = 0; i < board_.size(); ++i) {
+            switch (i % 4) {
+            case 0:
+                board_[i].setType(Box::Type::wall);
+                break;
+            case 1:
+                board_[i].setType(Box::Type::empty);
+                break;
+            case 2:
+                board_[i].setType(Box::Type::point);
+                break;
+            case 3:
+                board_[i].setType(Box::Type::super_point);
+                break;
+            }
+        }
+    }
+
+    void render();
+
+    int rows() const { return rows_; }
+    int column() const { return columns_; }
+    Box &getBox(int i, int j) { return board_.at(i * rows() + j); }
+
+  private:
+    const int rows_;
+    const int columns_;
+
+    std::vector<Box> board_;
+};
+
+void Board::render() {
+    // TODO: add padding
+    // so the board will be in the center of window
+    for (int i = 0; i < rows(); ++i) {
+        for (int j = 0; j < column(); ++j) {
+            getBox(i, j).render(i * Box::size, j * Box::size);
+        }
+    }
+}
 
 void Pacman::move() {
     texture.x += velocity_x;
@@ -81,13 +159,11 @@ void Pacman::handleEvent(SDL_Event &e) {
 
 void Pacman::render() const {
     // more rendering
-    Uint8 r, g, b, a;
-    SDL_GetRenderDrawColor(gRenderer, &r, &g, &b, &a);
-
     SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0, 0xFF);
     SDL_RenderFillRect(gRenderer, &texture);
 
-    SDL_SetRenderDrawColor(gRenderer, r, g, b, a);
+    SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 0xFF);
+    SDL_RenderDrawRect(gRenderer, &texture);
 }
 
 bool init_game() {
@@ -139,6 +215,7 @@ int main() {
     bool quit = false;
     SDL_Event e;
     Pacman pacman;
+    Board board(14, 14);
     while (!quit) {
         while (SDL_PollEvent(&e)) {
             if (e.type == SDL_QUIT) {
@@ -153,6 +230,7 @@ int main() {
         SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
         SDL_RenderClear(gRenderer);
 
+        board.render();
         pacman.render();
 
         // update screen

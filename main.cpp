@@ -33,6 +33,10 @@ class Pacman {
     int velocity_y;
 };
 
+// - wall -> block / collision
+// - point -> gain 10 points
+// - super-point -> gain 100 points and ability to eat ghosts
+// - empty -> pacman can go through
 class Box {
   public:
     static constexpr int size = Pacman::height;
@@ -91,7 +95,7 @@ class Board {
     void render();
 
     int rows() const { return rows_; }
-    int column() const { return columns_; }
+    int columns() const { return columns_; }
     Box &getBox(int i, int j) { return board_.at(i * rows() + j); }
 
   private:
@@ -102,12 +106,18 @@ class Board {
 };
 
 void Board::render() {
-    // TODO: add padding
-    // so the board will be in the center of window
+    SDL_Point top_left{screen_width / 2 - (rows() * Box::size) / 2,
+                       screen_height / 2 - (columns() * Box::size) / 2};
+
+    // top left corner of each box
+    SDL_Point box = top_left;
     for (int i = 0; i < rows(); ++i) {
-        for (int j = 0; j < column(); ++j) {
-            getBox(i, j).render(i * Box::size, j * Box::size);
+        for (int j = 0; j < columns(); ++j) {
+            getBox(i, j).render(box.x, box.y);
+            box.x += Box::size;
         }
+        box.x = top_left.x;
+        box.y += Box::size;
     }
 }
 

@@ -20,6 +20,8 @@ class Pacman {
     static constexpr int velocity = 1;
 
     Pacman() : texture({0, 0, width, height}), velocity_x{0}, velocity_y{0} {}
+    Pacman(int x, int y)
+        : texture({x, y, width, height}), velocity_x{0}, velocity_y{0} {}
 
     void handleEvent(SDL_Event &e);
     void move();
@@ -73,11 +75,15 @@ void Box::render(int x, int y) {
 
 class Board {
   public:
-    Board(int w, int h) : rows_(h), columns_(h), board_(w * h) {
+    Board(int w, int h)
+        : rows_(h), columns_(h),
+          border{screen_width / 2 - (rows() * Box::size) / 2,
+                 screen_height / 2 - (columns() * Box::size) / 2,
+                 columns() * Box::size, rows() * Box::size},
+          board_(w * h) {
         for (int i = 0; i < board_.size(); ++i) {
             switch (i % 4) {
             case 0:
-                board_[i].setType(Box::Type::wall);
                 break;
             case 1:
                 board_[i].setType(Box::Type::empty);
@@ -92,6 +98,11 @@ class Board {
         }
     }
 
+    SDL_Point getPos() const {
+        SDL_Point p{border.x, border.y};
+        return p;
+    }
+
     void render();
 
     int rows() const { return rows_; }
@@ -102,23 +113,24 @@ class Board {
     const int rows_;
     const int columns_;
 
+    const SDL_Rect border;
+
     std::vector<Box> board_;
 };
 
 void Board::render() {
-    SDL_Point top_left{screen_width / 2 - (rows() * Box::size) / 2,
-                       screen_height / 2 - (columns() * Box::size) / 2};
-
-    // top left corner of each box
-    SDL_Point box = top_left;
+    SDL_Point box{border.x, border.y};
     for (int i = 0; i < rows(); ++i) {
         for (int j = 0; j < columns(); ++j) {
             getBox(i, j).render(box.x, box.y);
             box.x += Box::size;
         }
-        box.x = top_left.x;
+        box.x = border.x;
         box.y += Box::size;
     }
+
+    SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 0xFF);
+    SDL_RenderDrawRect(gRenderer, &border);
 }
 
 void Pacman::move() {
@@ -224,8 +236,10 @@ int main() {
     std::printf("Successfuly set up game\n");
     bool quit = false;
     SDL_Event e;
-    Pacman pacman;
     Board board(14, 14);
+
+    SDL_Point start_pos = board.getPos();
+    Pacman pacman(start_pos.x, start_pos.y);
     while (!quit) {
         while (SDL_PollEvent(&e)) {
             if (e.type == SDL_QUIT) {

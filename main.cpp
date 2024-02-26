@@ -13,18 +13,20 @@ SDL_Renderer *gRenderer;
 constexpr int screen_width = 800;
 constexpr int screen_height = 600;
 
+class Board;
+
 class Pacman {
   public:
-    static constexpr int height = 40;
-    static constexpr int width = 40;
-    static constexpr int velocity = 1;
+    static constexpr int height = 30;
+    static constexpr int width = 30;
+    static constexpr int velocity = 2;
 
     Pacman() : texture({0, 0, width, height}), velocity_x{0}, velocity_y{0} {}
     Pacman(int x, int y)
         : texture({x, y, width, height}), velocity_x{0}, velocity_y{0} {}
 
     void handleEvent(SDL_Event &e);
-    void move();
+    void move(Board &b);
     void render() const;
 
   private:
@@ -41,7 +43,7 @@ class Pacman {
 // - empty -> pacman can go through
 class Box {
   public:
-    static constexpr int size = Pacman::height;
+    static constexpr int size = Pacman::height + 10;
     enum class Type : int8_t { wall, point, super_point, empty };
 
     void render(int x, int y);
@@ -84,15 +86,12 @@ class Board {
         for (int i = 0; i < board_.size(); ++i) {
             switch (i % 4) {
             case 0:
-                break;
             case 1:
+            case 2:
                 board_[i].setType(Box::Type::empty);
                 break;
-            case 2:
-                board_[i].setType(Box::Type::point);
-                break;
             case 3:
-                board_[i].setType(Box::Type::super_point);
+                board_[i].setType(Box::Type::wall);
                 break;
             }
         }
@@ -129,18 +128,85 @@ void Board::render() {
         box.y += Box::size;
     }
 
-    SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 0xFF);
+    SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
     SDL_RenderDrawRect(gRenderer, &border);
 }
 
-void Pacman::move() {
+bool checkCollision(const SDL_Rect &a, const SDL_Rect &b) {
+    // The sides of the rectangles
+    int leftA, leftB;
+    int rightA, rightB;
+    int topA, topB;
+    int bottomA, bottomB;
+
+    // Calculate the sides of rect A
+    leftA = a.x;
+    rightA = a.x + a.w;
+    topA = a.y;
+    bottomA = a.y + a.h;
+
+    // Calculate the sides of rect B
+    leftB = b.x;
+    rightB = b.x + b.w;
+    topB = b.y;
+    bottomB = b.y + b.h;
+    // If any of the sides from A are outside of B
+    if (bottomA <= topB) {
+        return false;
+    }
+
+    if (topA >= bottomB) {
+        return false;
+    }
+
+    if (rightA <= leftB) {
+        return false;
+    }
+
+    if (leftA >= rightB) {
+        return false;
+    }
+
+    // If none of the sides from A are outside B
+    return true;
+}
+
+bool checkCollision(SDL_Rect &p, Board &b) {
+    // TODO: check only surrounding boxes
+    SDL_Rect box{b.getPos().x, b.getPos().y, Box::size, Box::size};
+    for (int i = 0; i < b.rows(); ++i) {
+        for (int j = 0; j < b.columns(); ++j) {
+            if (b.getBox(i, j).getType() == Box::Type::wall &&
+                checkCollision(p, box)) {
+                return true;
+            }
+
+            box.x += Box::size;
+        }
+
+        box.x = b.getPos().x;
+        box.y += Box::size;
+    }
+
+    return false;
+    // collision boxes
+}
+
+void Pacman::move(Board &b) {
+    SDL_Rect border{b.getPos().x, b.getPos().y, b.columns() * Box::size,
+                    b.rows() * Box::size};
+
     texture.x += velocity_x;
-    if ((texture.x < 0) || (texture.x + texture.w > screen_width)) {
+    if ((texture.x < border.x) ||
+        (texture.x + texture.w > border.x + border.w) ||
+        checkCollision(texture, b)) {
         texture.x -= velocity_x;
     }
 
     texture.y += velocity_y;
-    if ((texture.y < 0) || (texture.y + texture.h) > screen_height) {
+    if ((texture.y < border.y) ||
+        (texture.y + texture.h) > border.y + border.h ||
+        checkCollision(texture, b)) {
         texture.y -= velocity_y;
     }
 }
@@ -248,10 +314,10 @@ int main() {
 
             pacman.handleEvent(e);
         }
-        pacman.move();
+        pacman.move(board);
 
         // clear screen
-        SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
+        SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 0xFF);
         SDL_RenderClear(gRenderer);
 
         board.render();

@@ -3,17 +3,90 @@
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_rect.h>
 #include <SDL2/SDL_render.h>
+#include <SDL2/SDL_ttf.h>
 #include <cstdio>
+#include <sstream>
+#include <string>
 #include <vector>
 
 // TODO: use SDL functions with unique_ptr
-SDL_Window *gWindow;
-SDL_Renderer *gRenderer;
+SDL_Window *gWindow = nullptr;
+SDL_Renderer *gRenderer = nullptr;
+TTF_Font *gFont = nullptr;
 
 constexpr int screen_width = 800;
 constexpr int screen_height = 600;
 
+int points = 0;
+
 class Board;
+
+class TextTexture {
+  public:
+    TextTexture() : texture(nullptr), width(0), height(0){};
+    ~TextTexture() { free(); };
+
+    bool loadText(const std::string &text, SDL_Color color);
+    void free();
+    void set_color(Uint8 r, Uint8 g, Uint8 b);
+
+    void render(int x, int y);
+
+    int getWidth() const { return width; };
+    int getHeight() const { return height; };
+
+  private:
+    SDL_Texture *texture;
+
+    int width;
+    int height;
+};
+
+void TextTexture::free() {
+    if (!texture) {
+        return;
+    }
+
+    SDL_DestroyTexture(texture);
+    texture = nullptr;
+    width = height = 0;
+}
+void TextTexture::set_color(Uint8 r, Uint8 g, Uint8 b) {}
+
+void TextTexture::render(int x, int y) {
+    SDL_Rect render = {x,y, width, height};
+    SDL_RenderCopy(gRenderer, texture, NULL, &render);
+}
+
+bool TextTexture::loadText(const std::string &text, SDL_Color color) {
+    // get rid of preexisintg texture
+    free();
+
+    SDL_Surface *textSurface = TTF_RenderText_Solid(gFont, text.c_str(), color);
+    if (!textSurface) {
+        std::printf("Unable to render text surface! SDL_ttf Error: %s\n",
+                    TTF_GetError());
+        return false;
+    }
+
+    // create texture from surface pixels
+    bool success = true;
+    texture = SDL_CreateTextureFromSurface(gRenderer, textSurface);
+    if (!texture) {
+        std::printf(
+            "Unable to create texture from rendered text! SDL Error: %s\n",
+            SDL_GetError());
+        success = false;
+    } else {
+        // get image dimensions
+        width = textSurface->w;
+        height = textSurface->h;
+    }
+
+    SDL_FreeSurface(textSurface);
+
+    return success;
+}
 
 // TODO: inherit from Enitty object
 // create GHOST enemy
@@ -85,20 +158,7 @@ class Board {
           border{screen_width / 2 - (rows() * Box::size) / 2,
                  screen_height / 2 - (columns() * Box::size) / 2,
                  columns() * Box::size, rows() * Box::size},
-          board_(w * h) {
-        for (size_t i = 0; i < board_.size(); ++i) {
-            switch (i % 4) {
-            case 0:
-            case 1:
-            case 2:
-                board_[i].setType(Box::Type::point);
-                break;
-            case 3:
-                board_[i].setType(Box::Type::wall);
-                break;
-            }
-        }
-    }
+          board_(w * h) {}
 
     SDL_Point getPos() const {
         SDL_Point p{border.x, border.y};
@@ -119,6 +179,27 @@ class Board {
 
     std::vector<Box> board_;
 };
+
+Board createLevel1() {
+    Board level(14, 14);
+    for (int i = 0; i < level.columns(); ++i) {
+        for (int j = 0; j < level.rows(); ++j) {
+            int index = i * level.columns() + j;
+            switch (index % 4) {
+            case 0:
+            case 1:
+            case 2:
+                level.getBox(i, j).setType(Box::Type::point);
+                break;
+            case 3:
+                level.getBox(i, j).setType(Box::Type::wall);
+                break;
+            }
+        }
+    }
+
+    return level;
+}
 
 void Board::render() {
     SDL_Point box{border.x, border.y};
@@ -194,6 +275,29 @@ Box *checkCollision(SDL_Rect &p, Board &b, Box::Type boxType) {
     // collision boxes
 }
 
+Box *pointIsReached(SDL_Rect &p, Board &b, Box::Type boxType) {
+    // TODO: check only surrounding boxes
+
+    SDL_Rect box{b.getPos().x, b.getPos().y, Box::size, Box::size};
+    for (int i = 0; i < b.rows(); ++i) {
+        for (int j = 0; j < b.columns(); ++j) {
+            SDL_Point box_center{box.x + Box::size / 2, box.y + Box::size / 2};
+            if (b.getBox(i, j).getType() == boxType &&
+                SDL_PointInRect(&box_center, &p)) {
+
+                return &b.getBox(i, j);
+            }
+
+            box.x += Box::size;
+        }
+
+        box.x = b.getPos().x;
+        box.y += Box::size;
+    }
+
+    return nullptr;
+}
+
 void Pacman::move(Board &b) {
     SDL_Rect border{b.getPos().x, b.getPos().y, b.columns() * Box::size,
                     b.rows() * Box::size};
@@ -240,7 +344,8 @@ void Pacman::move(Board &b) {
     }
 
     Box *box;
-    if ((box = checkCollision(texture, b, Box::Type::point)) != nullptr) {
+    if ((box = pointIsReached(texture, b, Box::Type::point)) != nullptr) {
+        ++points;
         // TODO: emmit sound for eating ball point
         box->setType(Box::Type::empty);
     }
@@ -308,14 +413,39 @@ bool init_game() {
     // Initialize renderer color
     SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
 
+    // Initialize SDL_ttf
+    if (TTF_Init() == -1) {
+        std::printf("SDL_ttf could not initialize! SDL_ttf Error: %s\n",
+                    TTF_GetError());
+        success = false;
+    }
+
     // Create window
 
     return success;
 }
 
+bool load_media() {
+    bool success = true;
+
+    gFont = TTF_OpenFont("./Oswald-VariableFont_wght.ttf", Box::size / 2);
+    if (!gFont) {
+        std::printf("Failed to load font! SDL_ttf Error: %s\n", TTF_GetError());
+        success = false;
+    }
+
+    return success;
+}
+
 void close_game() {
+    TTF_CloseFont(gFont);
+
     SDL_DestroyRenderer(gRenderer);
     SDL_DestroyWindow(gWindow);
+
+    // quit subsystems
+    TTF_Quit();
+    SDL_Quit();
 }
 
 int main() {
@@ -324,16 +454,25 @@ int main() {
         return 1;
     }
 
+    if (!load_media()) {
+        std::printf("Failed to load media!\n");
+        return 1;
+    }
+
     std::printf("Successfuly set up game\n");
     bool quit = false;
     SDL_Event e;
-    Board board(14, 14);
+    Board board = createLevel1();
 
     SDL_Point start_pos = board.getPos();
     // TODO: change pacman start position to be inside box
     start_pos.x += (Box::size - Pacman::width) / 2;
     start_pos.y += (Box::size - Pacman::width) / 2;
     Pacman pacman(start_pos.x, start_pos.y);
+    TextTexture font;
+    std::ostringstream points_str;
+    SDL_Color black{0xFF, 0xFF, 0xFF, 0xFF};
+
     while (!quit) {
         while (SDL_PollEvent(&e)) {
             if (e.type == SDL_QUIT) {
@@ -344,11 +483,16 @@ int main() {
         }
         pacman.move(board);
 
+        points_str.str("");
+        points_str << points;
+
+        font.loadText(points_str.str(), black);
         // clear screen
         SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 0xFF);
         SDL_RenderClear(gRenderer);
 
         board.render();
+        font.render(10, screen_height - font.getHeight() - 10);
 
         pacman.render();
 

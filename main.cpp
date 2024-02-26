@@ -3,6 +3,7 @@
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_rect.h>
 #include <SDL2/SDL_render.h>
+#include <SDL2/SDL_timer.h>
 #include <SDL2/SDL_ttf.h>
 #include <cstdio>
 #include <sstream>
@@ -18,6 +19,7 @@ constexpr int screen_width = 800;
 constexpr int screen_height = 600;
 
 int points = 0;
+int totalPoints = 0;
 
 class Board;
 
@@ -54,7 +56,7 @@ void TextTexture::free() {
 void TextTexture::set_color(Uint8 r, Uint8 g, Uint8 b) {}
 
 void TextTexture::render(int x, int y) {
-    SDL_Rect render = {x,y, width, height};
+    SDL_Rect render = {x, y, width, height};
     SDL_RenderCopy(gRenderer, texture, NULL, &render);
 }
 
@@ -87,6 +89,67 @@ bool TextTexture::loadText(const std::string &text, SDL_Color color) {
 
     return success;
 }
+
+class Timer {
+  public:
+    Timer() : startTicks{0}, running{false} {}
+
+    void start() {
+        running = true;
+        paused = false;
+
+        startTicks = SDL_GetTicks();
+        pausedTicks = 0;
+    }
+
+    void stop() {
+        running = false;
+        paused = false;
+
+        pausedTicks = 0;
+        startTicks = 0;
+    }
+
+    void pause() {
+        if (running && !paused) {
+            paused = true;
+            // calculate the paused ticks
+            pausedTicks = SDL_GetTicks() - startTicks;
+            startTicks = 0;
+        }
+    }
+
+    void unpause() {
+        if (running && paused) {
+            paused = false;
+            startTicks = SDL_GetTicks() - pausedTicks;
+            pausedTicks = 0;
+        }
+    }
+
+    Uint32 getTicks() const {
+        Uint32 time = 0;
+        if (running) {
+            if (paused) {
+                time = pausedTicks;
+            } else {
+                time = SDL_GetTicks() - startTicks;
+            }
+        }
+
+        return time;
+    }
+
+    bool isRunning() const { return running; }
+    bool isPaused() const { return paused; }
+
+  private:
+    Uint32 startTicks;  // when clock time started
+    Uint32 pausedTicks; // ticks stored when the timer was paused
+
+    bool running;
+    bool paused;
+};
 
 // TODO: inherit from Enitty object
 // create GHOST enemy
@@ -189,6 +252,7 @@ Board createLevel1() {
             case 0:
             case 1:
             case 2:
+                    ++totalPoints;
                 level.getBox(i, j).setType(Box::Type::point);
                 break;
             case 3:
@@ -469,10 +533,16 @@ int main() {
     start_pos.x += (Box::size - Pacman::width) / 2;
     start_pos.y += (Box::size - Pacman::width) / 2;
     Pacman pacman(start_pos.x, start_pos.y);
-    TextTexture font;
+
+    TextTexture points_texture;
+    TextTexture fps_texture;
     std::ostringstream points_str;
+    std::ostringstream fps_str;
     SDL_Color black{0xFF, 0xFF, 0xFF, 0xFF};
 
+    Timer fpsTimer;
+    int frames = 0;
+    fpsTimer.start();
     while (!quit) {
         while (SDL_PollEvent(&e)) {
             if (e.type == SDL_QUIT) {
@@ -481,23 +551,40 @@ int main() {
 
             pacman.handleEvent(e);
         }
+
+        float avgFPS = frames / (fpsTimer.getTicks() / 1000.f);
+        if (avgFPS > 2'000'000) {
+            avgFPS = 0;
+        }
+
         pacman.move(board);
 
         points_str.str("");
-        points_str << points;
+        points_str << "Points: " << points;
+        fps_str.str("");
+        fps_str << "FPS: " << static_cast<int>(avgFPS);
 
-        font.loadText(points_str.str(), black);
+        points_texture.loadText(points_str.str(), black);
+        fps_texture.loadText(fps_str.str(), black);
         // clear screen
         SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 0xFF);
         SDL_RenderClear(gRenderer);
 
         board.render();
-        font.render(10, screen_height - font.getHeight() - 10);
+        points_texture.render(10,
+                              screen_height - points_texture.getHeight() - 10);
+        fps_texture.render(screen_width - fps_texture.getWidth() - 10, 10);
 
         pacman.render();
 
+        if (points == totalPoints) {
+            std::printf("You won\n");
+            break;
+        }
+
         // update screen
         SDL_RenderPresent(gRenderer);
+        ++frames;
     }
 
     std::printf("Cleaning up game\n");

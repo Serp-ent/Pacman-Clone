@@ -65,7 +65,7 @@ void Box::render(int x, int y) {
         SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 0xFF);
         break;
     case Type::point:
-        SDL_SetRenderDrawColor(gRenderer, 0, 0xFF, 0, 0xFF);
+        SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0, 0xFF);
         break;
     case Type::empty:
         SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xF);
@@ -88,7 +88,7 @@ class Board {
             case 0:
             case 1:
             case 2:
-                board_[i].setType(Box::Type::empty);
+                board_[i].setType(Box::Type::point);
                 break;
             case 3:
                 board_[i].setType(Box::Type::wall);
@@ -171,14 +171,13 @@ bool checkCollision(const SDL_Rect &a, const SDL_Rect &b) {
     return true;
 }
 
-bool checkCollision(SDL_Rect &p, Board &b) {
+Box *checkCollision(SDL_Rect &p, Board &b, Box::Type boxType) {
     // TODO: check only surrounding boxes
     SDL_Rect box{b.getPos().x, b.getPos().y, Box::size, Box::size};
     for (int i = 0; i < b.rows(); ++i) {
         for (int j = 0; j < b.columns(); ++j) {
-            if (b.getBox(i, j).getType() == Box::Type::wall &&
-                checkCollision(p, box)) {
-                return true;
+            if (b.getBox(i, j).getType() == boxType && checkCollision(p, box)) {
+                return &b.getBox(i, j);
             }
 
             box.x += Box::size;
@@ -188,7 +187,7 @@ bool checkCollision(SDL_Rect &p, Board &b) {
         box.y += Box::size;
     }
 
-    return false;
+    return nullptr;
     // collision boxes
 }
 
@@ -199,15 +198,20 @@ void Pacman::move(Board &b) {
     texture.x += velocity_x;
     if ((texture.x < border.x) ||
         (texture.x + texture.w > border.x + border.w) ||
-        checkCollision(texture, b)) {
+        checkCollision(texture, b, Box::Type::wall)) {
         texture.x -= velocity_x;
     }
 
     texture.y += velocity_y;
     if ((texture.y < border.y) ||
         (texture.y + texture.h) > border.y + border.h ||
-        checkCollision(texture, b)) {
+        checkCollision(texture, b, Box::Type::wall)) {
         texture.y -= velocity_y;
+    }
+
+    Box *box;
+    if ((box = checkCollision(texture, b, Box::Type::point)) != nullptr) {
+        box->setType(Box::Type::empty);
     }
 }
 

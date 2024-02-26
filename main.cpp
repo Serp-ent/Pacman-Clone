@@ -86,7 +86,7 @@ class Board {
                  screen_height / 2 - (columns() * Box::size) / 2,
                  columns() * Box::size, rows() * Box::size},
           board_(w * h) {
-        for (int i = 0; i < board_.size(); ++i) {
+        for (size_t i = 0; i < board_.size(); ++i) {
             switch (i % 4) {
             case 0:
             case 1:
@@ -199,6 +199,8 @@ void Pacman::move(Board &b) {
                     b.rows() * Box::size};
 
     // TODO: fix jumping
+    // TODO: fix moving inside on rectnagle when there is border
+    // e.g. pacman can move up and down when there are upper and lower boxes
     // // maybe keep surrounding 9 box that surrounds pacman
     // and check if we can enter them
     SDL_Point texture_center = {texture.x + Pacman::width / 2,
@@ -328,6 +330,9 @@ int main() {
     Board board(14, 14);
 
     SDL_Point start_pos = board.getPos();
+    // TODO: change pacman start position to be inside box
+    start_pos.x += (Box::size - Pacman::width) / 2;
+    start_pos.y += (Box::size - Pacman::width) / 2;
     Pacman pacman(start_pos.x, start_pos.y);
     while (!quit) {
         while (SDL_PollEvent(&e)) {
@@ -345,12 +350,6 @@ int main() {
 
         board.render();
 
-        SDL_SetRenderDrawColor(gRenderer, 0xFF, 0, 0, 0xFF);
-        SDL_RenderDrawLine(gRenderer, board.getPos().x + Box::size / 2,
-                           board.getPos().y + Box::size / 2,
-                           board.getPos().x + board.columns() * Box::size -
-                               Box::size / 2,
-                           board.getPos().y + Box::size / 2);
         pacman.render();
 
         // update screen

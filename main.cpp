@@ -15,6 +15,9 @@ constexpr int screen_height = 600;
 
 class Board;
 
+// TODO: inherit from Enitty object
+// create GHOST enemy
+
 class Pacman {
   public:
     static constexpr int height = 30;
@@ -211,39 +214,30 @@ void Pacman::move(Board &b) {
 
     Box *box;
     if ((box = checkCollision(texture, b, Box::Type::point)) != nullptr) {
+        // TODO: emmit sound for eating ball point
         box->setType(Box::Type::empty);
     }
 }
 
 void Pacman::handleEvent(SDL_Event &e) {
+    // TODO: pacman should not change direction when there is collison
     if (e.type == SDL_KEYDOWN && e.key.repeat == 0) {
         switch (e.key.keysym.sym) {
         case SDLK_UP:
-            velocity_y -= velocity;
+            velocity_y = -velocity;
+            velocity_x = 0;
             break;
         case SDLK_DOWN:
-            velocity_y += velocity;
+            velocity_y = velocity;
+            velocity_x = 0;
             break;
         case SDLK_RIGHT:
-            velocity_x += velocity;
+            velocity_y = 0;
+            velocity_x = velocity;
             break;
         case SDLK_LEFT:
-            velocity_x -= velocity;
-            break;
-        }
-    } else if (e.type == SDL_KEYUP && e.key.repeat == 0) {
-        switch (e.key.keysym.sym) {
-        case SDLK_UP:
-            velocity_y += velocity;
-            break;
-        case SDLK_DOWN:
-            velocity_y -= velocity;
-            break;
-        case SDLK_RIGHT:
-            velocity_x -= velocity;
-            break;
-        case SDLK_LEFT:
-            velocity_x += velocity;
+            velocity_y = 0;
+            velocity_x = -velocity;
             break;
         }
     }

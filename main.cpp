@@ -198,18 +198,43 @@ void Pacman::move(Board &b) {
     SDL_Rect border{b.getPos().x, b.getPos().y, b.columns() * Box::size,
                     b.rows() * Box::size};
 
-    texture.x += velocity_x;
-    if ((texture.x < border.x) ||
-        (texture.x + texture.w > border.x + border.w) ||
-        checkCollision(texture, b, Box::Type::wall)) {
-        texture.x -= velocity_x;
-    }
+    // TODO: fix jumping
+    // // maybe keep surrounding 9 box that surrounds pacman
+    // and check if we can enter them
+    SDL_Point texture_center = {texture.x + Pacman::width / 2,
+                                texture.y + Pacman::height / 2};
 
-    texture.y += velocity_y;
-    if ((texture.y < border.y) ||
-        (texture.y + texture.h) > border.y + border.h ||
-        checkCollision(texture, b, Box::Type::wall)) {
-        texture.y -= velocity_y;
+    int i = (texture_center.x - b.getPos().x) / Box::size;
+    int j = (texture_center.y - b.getPos().y) / Box::size;
+    if (velocity_x) {
+        texture.x += velocity_x;
+        // fix y position
+        SDL_Point curr_box_center = {
+            b.getPos().x + i * Box::size + Box::size / 2,
+            b.getPos().y + j * Box::size + Box::size / 2};
+        int correct_y = curr_box_center.y - texture.h / 2;
+        texture.y = correct_y;
+
+        if ((texture.x < border.x) ||
+            (texture.x + texture.w > border.x + border.w) ||
+            checkCollision(texture, b, Box::Type::wall)) {
+            texture.x -= velocity_x;
+        }
+    } else if (velocity_y) {
+        texture.y += velocity_y;
+
+        // fix x position
+        SDL_Point curr_box_center = {
+            b.getPos().x + i * Box::size + Box::size / 2,
+            b.getPos().y + j * Box::size + Box::size / 2};
+        int correct_x = curr_box_center.x - texture.w / 2;
+        texture.x = correct_x;
+
+        if ((texture.y < border.y) ||
+            (texture.y + texture.h) > border.y + border.h ||
+            checkCollision(texture, b, Box::Type::wall)) {
+            texture.y -= velocity_y;
+        }
     }
 
     Box *box;
@@ -319,6 +344,13 @@ int main() {
         SDL_RenderClear(gRenderer);
 
         board.render();
+
+        SDL_SetRenderDrawColor(gRenderer, 0xFF, 0, 0, 0xFF);
+        SDL_RenderDrawLine(gRenderer, board.getPos().x + Box::size / 2,
+                           board.getPos().y + Box::size / 2,
+                           board.getPos().x + board.columns() * Box::size -
+                               Box::size / 2,
+                           board.getPos().y + Box::size / 2);
         pacman.render();
 
         // update screen

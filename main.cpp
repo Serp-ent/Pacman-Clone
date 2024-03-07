@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 
+// TODO: create level designer in SDL2 that creates textfile with map
 // TODO: use SDL functions with unique_ptr
 SDL_Window *gWindow = nullptr;
 SDL_Renderer *gRenderer = nullptr;
@@ -18,6 +19,7 @@ TTF_Font *gFont = nullptr;
 constexpr int screen_width = 800;
 constexpr int screen_height = 600;
 
+bool checkCollision(const SDL_Rect &a, const SDL_Rect &b);
 int points = 0;
 int totalPoints = 0;
 
@@ -168,6 +170,8 @@ class Pacman {
     void move(Board &b);
     void render() const;
 
+    const SDL_Rect &getCollision() const { return texture; }
+
   private:
     // TODO: add sprite
     SDL_Rect texture;
@@ -175,6 +179,37 @@ class Pacman {
     int velocity_x;
     int velocity_y;
 };
+
+class Ghost {
+    // TODO: set random point that Ghost travel to
+  public:
+    static constexpr int height = 30;
+    static constexpr int width = 30;
+    static constexpr int velocity = 2;
+
+    Ghost() : texture({0, 0, width, height}), velocity_x{0}, velocity_y{0} {}
+    Ghost(int x, int y)
+        : texture({x, y, width, height}), velocity_x{0}, velocity_y{0} {}
+
+    void move(Board &b, Pacman &pacman);
+    void render() const;
+
+  private:
+    // TODO: add sprite
+    SDL_Rect texture;
+
+    int velocity_x;
+    int velocity_y;
+};
+
+void Ghost::render() const {
+    // more rendering
+    SDL_SetRenderDrawColor(gRenderer, 0xFF, 0, 0, 0xAA);
+    SDL_RenderFillRect(gRenderer, &texture);
+
+    SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 0xFF);
+    SDL_RenderDrawRect(gRenderer, &texture);
+}
 
 // - wall -> block / collision
 // - point -> gain 10 points
@@ -243,6 +278,87 @@ class Board {
     std::vector<Box> board_;
 };
 
+Box *pointIsReached(SDL_Rect &p, Board &b, Box::Type boxType);
+Box *checkCollision(SDL_Rect &p, Board &b, Box::Type boxType);
+
+void Ghost::move(Board &b, Pacman &pacman) {
+
+    // TODO: non-random decisions
+    static int moveNumber = 0;
+    if (moveNumber == 40) {
+        int direction = random();
+        velocity_y = 0;
+        velocity_x = 0;
+        switch (direction % 4) {
+        case 0:
+            velocity_x += 2;
+            break;
+        case 1:
+            velocity_x -= 2;
+            break;
+        case 2:
+            velocity_y -= 2;
+            break;
+        case 3:
+            velocity_y += 2;
+            break;
+        }
+
+        moveNumber = 0;
+    }
+
+    ++moveNumber;
+
+    SDL_Rect border{b.getPos().x, b.getPos().y, b.columns() * Box::size,
+                    b.rows() * Box::size};
+
+    // TODO: fix jumping
+    // TODO: fix moving inside on rectnagle when there is border
+    // e.g. can move up and down when there are upper and lower boxes
+    // // maybe keep surrounding 9 box that surrounds pacman
+    // and check if we can enter them
+    SDL_Point texture_center = {texture.x + Pacman::width / 2,
+                                texture.y + Pacman::height / 2};
+
+    int i = (texture_center.x - b.getPos().x) / Box::size;
+    int j = (texture_center.y - b.getPos().y) / Box::size;
+    if (velocity_x) {
+        texture.x += velocity_x;
+        // fix y position
+        SDL_Point curr_box_center = {
+            b.getPos().x + i * Box::size + Box::size / 2,
+            b.getPos().y + j * Box::size + Box::size / 2};
+        int correct_y = curr_box_center.y - texture.h / 2;
+        texture.y = correct_y;
+
+        if ((texture.x < border.x) ||
+            (texture.x + texture.w > border.x + border.w) ||
+            checkCollision(texture, b, Box::Type::wall)) {
+            texture.x -= velocity_x;
+        }
+    } else if (velocity_y) {
+        texture.y += velocity_y;
+
+        // fix x position
+        SDL_Point curr_box_center = {
+            b.getPos().x + i * Box::size + Box::size / 2,
+            b.getPos().y + j * Box::size + Box::size / 2};
+        int correct_x = curr_box_center.x - texture.w / 2;
+        texture.x = correct_x;
+
+        if ((texture.y < border.y) ||
+            (texture.y + texture.h) > border.y + border.h ||
+            checkCollision(texture, b, Box::Type::wall)) {
+            texture.y -= velocity_y;
+        }
+    }
+
+    if (checkCollision(texture, pacman.getCollision())) {
+        std::printf("Pacman killed\n");
+    }
+}
+
+// TODO: don't return by copy
 Board createLevel1() {
     Board level(14, 14);
     for (int i = 0; i < level.columns(); ++i) {
@@ -252,10 +368,12 @@ Board createLevel1() {
             case 0:
             case 1:
             case 2:
-                    ++totalPoints;
+            case 3:
+                ++totalPoints;
                 level.getBox(i, j).setType(Box::Type::point);
                 break;
-            case 3:
+            case 4:
+                // BUG: non-reachable
                 level.getBox(i, j).setType(Box::Type::wall);
                 break;
             }
@@ -533,6 +651,7 @@ int main() {
     start_pos.x += (Box::size - Pacman::width) / 2;
     start_pos.y += (Box::size - Pacman::width) / 2;
     Pacman pacman(start_pos.x, start_pos.y);
+    Ghost ghost(start_pos.x + screen_width / 4, start_pos.y);
 
     TextTexture points_texture;
     TextTexture fps_texture;
@@ -558,6 +677,7 @@ int main() {
         }
 
         pacman.move(board);
+        ghost.move(board, pacman);
 
         points_str.str("");
         points_str << "Points: " << points;
@@ -576,6 +696,7 @@ int main() {
         fps_texture.render(screen_width - fps_texture.getWidth() - 10, 10);
 
         pacman.render();
+        ghost.render();
 
         if (points == totalPoints) {
             std::printf("You won\n");

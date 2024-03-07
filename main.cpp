@@ -367,7 +367,9 @@ void Ghost::move(Board &b, Pacman &pacman) {
         }
     }
 
-    if (checkCollision(texture, pacman.getCollision())) {
+    // Make collision only point so textures can overlap
+    SDL_Point collison{texture.x + texture.w / 2, texture.y + texture.h / 2};
+    if (SDL_PointInRect(&collison, &pacman.getCollision())) {
         pacman.clearState(true);
     }
 }

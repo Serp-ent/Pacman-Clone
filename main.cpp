@@ -7,8 +7,11 @@
 #include <SDL2/SDL_ttf.h>
 #include <cstdio>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <vector>
+
+// TODO: create MENU and HUD
 
 // TODO: create level designer in SDL2 that creates textfile with map
 // TODO: use SDL functions with unique_ptr
@@ -162,9 +165,12 @@ class Pacman {
     static constexpr int width = 30;
     static constexpr int velocity = 2;
 
-    Pacman() : texture({0, 0, width, height}), velocity_x{0}, velocity_y{0} {}
+    Pacman()
+        : texture({0, 0, width, height}), isDead(false), velocity_x{0},
+          velocity_y{0} {}
     Pacman(int x, int y)
-        : texture({x, y, width, height}), velocity_x{0}, velocity_y{0} {}
+        : texture({x, y, width, height}), isDead(false), velocity_x{0},
+          velocity_y{0} {}
 
     void handleEvent(SDL_Event &e);
     void move(Board &b);
@@ -172,9 +178,17 @@ class Pacman {
 
     const SDL_Rect &getCollision() const { return texture; }
 
+    bool wasKilled() const { return isDead; }
+    void clearState(bool death = false) { isDead = death; }
+
+    int getLifesLeft() const { return livesLeft; }
+    void setLifesLeft(int lives) { livesLeft = lives; }
+
   private:
     // TODO: add sprite
     SDL_Rect texture;
+    bool isDead = false;
+    int livesLeft = 3;
 
     int velocity_x;
     int velocity_y;
@@ -354,13 +368,13 @@ void Ghost::move(Board &b, Pacman &pacman) {
     }
 
     if (checkCollision(texture, pacman.getCollision())) {
-        std::printf("Pacman killed\n");
+        pacman.clearState(true);
     }
 }
 
 // TODO: don't return by copy
 Board createLevel1() {
-    Board level(14, 14);
+    Board level(5, 5);
     for (int i = 0; i < level.columns(); ++i) {
         for (int j = 0; j < level.rows(); ++j) {
             int index = i * level.columns() + j;
@@ -651,17 +665,25 @@ int main() {
     start_pos.x += (Box::size - Pacman::width) / 2;
     start_pos.y += (Box::size - Pacman::width) / 2;
     Pacman pacman(start_pos.x, start_pos.y);
-    Ghost ghost(start_pos.x + screen_width / 4, start_pos.y);
+    Ghost ghost(start_pos.x + (board.rows() - 1) * Box::size,
+                start_pos.y + (board.columns() - 1) * Box::size);
 
+    // TODO: create HUD class
     TextTexture points_texture;
     TextTexture fps_texture;
+    TextTexture livesLeft_texture;
+    std::ostringstream livesLeft_str;
     std::ostringstream points_str;
     std::ostringstream fps_str;
     SDL_Color black{0xFF, 0xFF, 0xFF, 0xFF};
 
+    TextTexture theEndText;
+    theEndText.loadText("The END", black);
+
     Timer fpsTimer;
     int frames = 0;
     fpsTimer.start();
+    bool gameEnd = false;
     while (!quit) {
         while (SDL_PollEvent(&e)) {
             if (e.type == SDL_QUIT) {
@@ -669,6 +691,19 @@ int main() {
             }
 
             pacman.handleEvent(e);
+        }
+        if (gameEnd) {
+            SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 0xFF);
+            SDL_RenderClear(gRenderer);
+
+            theEndText.render(screen_width / 2 - theEndText.getWidth() / 2,
+                              screen_height / 2 - theEndText.getHeight() / 2 -
+                                  points_texture.getHeight());
+            points_texture.render(
+                screen_width / 2 - points_texture.getWidth() / 2,
+                screen_height / 2 - points_texture.getHeight() / 2);
+            SDL_RenderPresent(gRenderer);
+            continue;
         }
 
         float avgFPS = frames / (fpsTimer.getTicks() / 1000.f);
@@ -678,14 +713,34 @@ int main() {
 
         pacman.move(board);
         ghost.move(board, pacman);
+        if (pacman.wasKilled()) {
+            pacman.setLifesLeft(pacman.getLifesLeft() - 1);
+
+            if (pacman.getLifesLeft() == 0) {
+                gameEnd = true;
+                continue;
+            }
+            // TODO: set position (the map/level should know where pacman
+            // and ghost start position is)
+            int lives = pacman.getLifesLeft();
+            // HACK: reset pacman and ghost position
+            pacman = Pacman(start_pos.x, start_pos.y);
+            pacman.setLifesLeft(lives);
+            ghost = Ghost(start_pos.x + (board.rows() - 1) * Box::size,
+                          start_pos.y + (board.columns() - 1) * Box::size);
+        }
 
         points_str.str("");
         points_str << "Points: " << points;
         fps_str.str("");
         fps_str << "FPS: " << static_cast<int>(avgFPS);
+        // TODO: change this texture only when pacman is killed
+        livesLeft_str.str("");
+        livesLeft_str << "Lives: " << pacman.getLifesLeft();
 
         points_texture.loadText(points_str.str(), black);
         fps_texture.loadText(fps_str.str(), black);
+        livesLeft_texture.loadText(livesLeft_str.str(), black);
         // clear screen
         SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 0xFF);
         SDL_RenderClear(gRenderer);
@@ -694,13 +749,15 @@ int main() {
         points_texture.render(10,
                               screen_height - points_texture.getHeight() - 10);
         fps_texture.render(screen_width - fps_texture.getWidth() - 10, 10);
+        livesLeft_texture.render(
+            screen_width - livesLeft_texture.getWidth() - 10,
+            screen_height - livesLeft_texture.getHeight() - 10);
 
         pacman.render();
         ghost.render();
 
         if (points == totalPoints) {
-            std::printf("You won\n");
-            break;
+            gameEnd = true;
         }
 
         // update screen

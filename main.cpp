@@ -19,13 +19,13 @@
 // TODO: create level designer in SDL2 that creates textfile with map
 // TODO: use SDL functions with unique_ptr
 
-int points = 0;
 int totalPoints = 0;
 
 // TODO: inherit from Enitty object
 // create GHOST enemy
 
 // TODO: don't return by copy
+// TODO: check ways to code board in file e.g ASCII or numbers
 Board createLevel1() {
     Board level(5, 5);
     for (int i = 0; i < level.columns(); ++i) {
@@ -51,8 +51,6 @@ Board createLevel1() {
 
 int main() {
     Game game;
-
-    std::printf("Successfuly set up game\n");
     bool quit = false;
     SDL_Event e;
     Board board = createLevel1();
@@ -61,7 +59,7 @@ int main() {
     // TODO: change pacman start position to be inside box
     start_pos.x += (Box::size - Pacman::width) / 2;
     start_pos.y += (Box::size - Pacman::width) / 2;
-    Pacman pacman(start_pos.x, start_pos.y);
+    Pacman pacman(game.get_points_ref(), start_pos.x, start_pos.y);
     Ghost ghost(start_pos.x + (board.rows() - 1) * Box::size,
                 start_pos.y + (board.columns() - 1) * Box::size);
 
@@ -80,8 +78,6 @@ int main() {
     Timer fpsTimer;
     int frames = 0;
     fpsTimer.start();
-    int points = 0;
-    bool gameEnd = false;
     while (!quit) {
         while (SDL_PollEvent(&e)) {
             if (e.type == SDL_QUIT) {
@@ -90,7 +86,7 @@ int main() {
 
             pacman.handleEvent(e);
         }
-        if (gameEnd) {
+        if (game.isEnd()) {
             SDL_SetRenderDrawColor(Game::gRenderer, 0, 0, 0, 0xFF);
             SDL_RenderClear(Game::gRenderer);
 
@@ -110,27 +106,29 @@ int main() {
             avgFPS = 0;
         }
 
-        pacman.move(board, points);
+        pacman.move(board);
         ghost.move(board, pacman);
         if (pacman.wasKilled()) {
             pacman.setLifesLeft(pacman.getLifesLeft() - 1);
 
             if (pacman.getLifesLeft() == 0) {
-                gameEnd = true;
+                game.setEnd();
                 continue;
             }
             // TODO: set position (the map/level should know where pacman
             // and ghost start position is)
             int lives = pacman.getLifesLeft();
             // HACK: reset pacman and ghost position
-            pacman = Pacman(start_pos.x, start_pos.y);
+            pacman = Pacman(game.get_points_ref(), start_pos.x, start_pos.y);
             pacman.setLifesLeft(lives);
             ghost = Ghost(start_pos.x + (board.rows() - 1) * Box::size,
                           start_pos.y + (board.columns() - 1) * Box::size);
+        } else if (game.get_points() == totalPoints) {
+            game.setEnd();
         }
 
         points_str.str("");
-        points_str << "Points: " << points;
+        points_str << "Points: " << game.get_points();
         fps_str.str("");
         fps_str << "FPS: " << static_cast<int>(avgFPS);
         // TODO: change this texture only when pacman is killed
@@ -145,19 +143,16 @@ int main() {
         SDL_RenderClear(Game::gRenderer);
 
         board.render();
-        points_texture.render(10,
-                              Game::screen_height - points_texture.getHeight() - 10);
-        fps_texture.render(Game::screen_width - fps_texture.getWidth() - 10, 10);
+        points_texture.render(10, Game::screen_height -
+                                      points_texture.getHeight() - 10);
+        fps_texture.render(Game::screen_width - fps_texture.getWidth() - 10,
+                           10);
         livesLeft_texture.render(
             Game::screen_width - livesLeft_texture.getWidth() - 10,
             Game::screen_height - livesLeft_texture.getHeight() - 10);
 
         pacman.render();
         ghost.render();
-
-        if (points == totalPoints) {
-            gameEnd = true;
-        }
 
         // update screen
         SDL_RenderPresent(Game::gRenderer);

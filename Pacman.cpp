@@ -5,7 +5,7 @@
 
 #include "Game.h"
 
-void Pacman::move(Board &b, int &points) {
+void Pacman::move(Board &b) {
     SDL_Rect border{b.getPos().x, b.getPos().y, b.columns() * Box::size,
                     b.rows() * Box::size};
 
@@ -54,7 +54,7 @@ void Pacman::move(Board &b, int &points) {
     if (((box = pointIsReached(texture, b, Box::Type::point)) != nullptr) ||
         (box = pointIsReached(texture, b, Box::Type::super_point)) != nullptr) {
 
-        ++points;
+        ++*points;
         // TODO: emmit sound for eating ball point
         box->setType(Box::Type::empty);
     }

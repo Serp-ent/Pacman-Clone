@@ -3,11 +3,9 @@
 #include "Board.h"
 #include "utils.h"
 
-// HACK: maybe use a common header
-extern SDL_Renderer *gRenderer;
-extern int points;
+#include "Game.h"
 
-void Pacman::move(Board &b) {
+void Pacman::move(Board &b, int &points) {
     SDL_Rect border{b.getPos().x, b.getPos().y, b.columns() * Box::size,
                     b.rows() * Box::size};
 
@@ -52,8 +50,10 @@ void Pacman::move(Board &b) {
         }
     }
 
-    Box *box;
-    if ((box = pointIsReached(texture, b, Box::Type::point)) != nullptr) {
+    Box *box = nullptr;
+    if (((box = pointIsReached(texture, b, Box::Type::point)) != nullptr) ||
+        (box = pointIsReached(texture, b, Box::Type::super_point)) != nullptr) {
+
         ++points;
         // TODO: emmit sound for eating ball point
         box->setType(Box::Type::empty);
@@ -86,9 +86,9 @@ void Pacman::handleEvent(SDL_Event &e) {
 
 void Pacman::render() const {
     // more rendering
-    SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0, 0xFF);
-    SDL_RenderFillRect(gRenderer, &texture);
+    SDL_SetRenderDrawColor(Game::gRenderer, 0xFF, 0xFF, 0, 0xFF);
+    SDL_RenderFillRect(Game::gRenderer, &texture);
 
-    SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 0xFF);
-    SDL_RenderDrawRect(gRenderer, &texture);
+    SDL_SetRenderDrawColor(Game::gRenderer, 0, 0, 0, 0xFF);
+    SDL_RenderDrawRect(Game::gRenderer, &texture);
 }

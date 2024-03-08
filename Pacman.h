@@ -19,7 +19,7 @@ class Pacman {
           velocity_y{0} {}
 
     void handleEvent(SDL_Event &e);
-    void move(Board &b);
+    void move(Board &b, int &points);
     void render() const;
 
     const SDL_Rect &getCollision() const { return texture; }

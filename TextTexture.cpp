@@ -1,10 +1,7 @@
 #include "TextTexture.h"
 
 #include <SDL2/SDL_ttf.h>
-
-// HACK: use common header
-extern SDL_Renderer *gRenderer;
-extern TTF_Font *gFont;
+#include "Game.h"
 
 void TextTexture::free() {
     if (!texture) {
@@ -19,14 +16,14 @@ void TextTexture::set_color(Uint8 r, Uint8 g, Uint8 b) {}
 
 void TextTexture::render(int x, int y) {
     SDL_Rect render = {x, y, width, height};
-    SDL_RenderCopy(gRenderer, texture, NULL, &render);
+    SDL_RenderCopy(Game::gRenderer, texture, NULL, &render);
 }
 
 bool TextTexture::loadText(const std::string &text, SDL_Color color) {
     // get rid of preexisintg texture
     free();
 
-    SDL_Surface *textSurface = TTF_RenderText_Solid(gFont, text.c_str(), color);
+    SDL_Surface *textSurface = TTF_RenderText_Solid(Game::gFont, text.c_str(), color);
     if (!textSurface) {
         std::printf("Unable to render text surface! SDL_ttf Error: %s\n",
                     TTF_GetError());
@@ -35,7 +32,7 @@ bool TextTexture::loadText(const std::string &text, SDL_Color color) {
 
     // create texture from surface pixels
     bool success = true;
-    texture = SDL_CreateTextureFromSurface(gRenderer, textSurface);
+    texture = SDL_CreateTextureFromSurface(Game::gRenderer, textSurface);
     if (!texture) {
         std::printf(
             "Unable to create texture from rendered text! SDL Error: %s\n",

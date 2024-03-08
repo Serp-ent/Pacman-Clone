@@ -3,17 +3,15 @@
 #include "Board.h"
 #include "utils.h"
 #include <SDL2/SDL_render.h>
-
-// HACK: share a header with declarations
-extern SDL_Renderer *gRenderer;
+#include "Game.h"
 
 void Ghost::render() const {
     // more rendering
-    SDL_SetRenderDrawColor(gRenderer, 0xFF, 0, 0, 0xAA);
-    SDL_RenderFillRect(gRenderer, &texture);
+    SDL_SetRenderDrawColor(Game::gRenderer, 0xFF, 0, 0, 0xAA);
+    SDL_RenderFillRect(Game::gRenderer, &texture);
 
-    SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 0xFF);
-    SDL_RenderDrawRect(gRenderer, &texture);
+    SDL_SetRenderDrawColor(Game::gRenderer, 0, 0, 0, 0xFF);
+    SDL_RenderDrawRect(Game::gRenderer, &texture);
 }
 
 void Ghost::move(Board &b, Pacman &pacman) {

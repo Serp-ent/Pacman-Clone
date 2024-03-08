@@ -12,13 +12,12 @@
 #include <string>
 #include <vector>
 
+#include "Game.h"
+
 // TODO: create MENU and HUD
 
 // TODO: create level designer in SDL2 that creates textfile with map
 // TODO: use SDL functions with unique_ptr
-SDL_Window *gWindow = nullptr;
-SDL_Renderer *gRenderer = nullptr;
-TTF_Font *gFont = nullptr;
 
 constexpr int screen_width = 800;
 constexpr int screen_height = 600;
@@ -39,13 +38,12 @@ Board createLevel1() {
             case 0:
             case 1:
             case 2:
-            case 3:
                 ++totalPoints;
                 level.getBox(i, j).setType(Box::Type::point);
                 break;
-            case 4:
-                // BUG: non-reachable
-                level.getBox(i, j).setType(Box::Type::wall);
+            case 3:
+                ++totalPoints;
+                level.getBox(i, j).setType(Box::Type::super_point);
                 break;
             }
         }
@@ -61,10 +59,10 @@ bool init_game() {
                     SDL_GetError());
         return false;
     }
-    gWindow = SDL_CreateWindow("Pacman", SDL_WINDOWPOS_CENTERED,
-                               SDL_WINDOWPOS_CENTERED, screen_width,
-                               screen_height, SDL_WINDOW_SHOWN);
-    if (!gWindow) {
+    Game::gWindow = SDL_CreateWindow("Pacman", SDL_WINDOWPOS_CENTERED,
+                                     SDL_WINDOWPOS_CENTERED, screen_width,
+                                     screen_height, SDL_WINDOW_SHOWN);
+    if (!Game::gWindow) {
         std::printf("SDL could not create window! SDL Error: %s\n",
                     SDL_GetError());
         return false;
@@ -72,16 +70,17 @@ bool init_game() {
 
     // create renderer for window
     // TODO: check if we want to use VSYNC or just cap FPS
-    gRenderer = SDL_CreateRenderer(
-        gWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-    if (!gRenderer) {
+    Game::gRenderer = SDL_CreateRenderer(Game::gWindow, -1,
+                                         SDL_RENDERER_ACCELERATED |
+                                             SDL_RENDERER_PRESENTVSYNC);
+    if (!Game::gRenderer) {
         std::printf("Renderer could not be created! SDL Error: %s\n",
                     SDL_GetError());
         return false;
     }
 
     // Initialize renderer color
-    SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
+    SDL_SetRenderDrawColor(Game::gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
 
     // Initialize SDL_ttf
     if (TTF_Init() == -1) {
@@ -98,8 +97,8 @@ bool init_game() {
 bool load_media() {
     bool success = true;
 
-    gFont = TTF_OpenFont("./Oswald-VariableFont_wght.ttf", Box::size / 2);
-    if (!gFont) {
+    Game::gFont = TTF_OpenFont("./Oswald-VariableFont_wght.ttf", Box::size / 2);
+    if (!Game::gFont) {
         std::printf("Failed to load font! SDL_ttf Error: %s\n", TTF_GetError());
         success = false;
     }
@@ -108,10 +107,10 @@ bool load_media() {
 }
 
 void close_game() {
-    TTF_CloseFont(gFont);
+    TTF_CloseFont(Game::gFont);
 
-    SDL_DestroyRenderer(gRenderer);
-    SDL_DestroyWindow(gWindow);
+    SDL_DestroyRenderer(Game::gRenderer);
+    SDL_DestroyWindow(Game::gWindow);
 
     // quit subsystems
     TTF_Quit();
@@ -157,6 +156,7 @@ int main() {
     Timer fpsTimer;
     int frames = 0;
     fpsTimer.start();
+    int points = 0;
     bool gameEnd = false;
     while (!quit) {
         while (SDL_PollEvent(&e)) {
@@ -167,8 +167,8 @@ int main() {
             pacman.handleEvent(e);
         }
         if (gameEnd) {
-            SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 0xFF);
-            SDL_RenderClear(gRenderer);
+            SDL_SetRenderDrawColor(Game::gRenderer, 0, 0, 0, 0xFF);
+            SDL_RenderClear(Game::gRenderer);
 
             theEndText.render(screen_width / 2 - theEndText.getWidth() / 2,
                               screen_height / 2 - theEndText.getHeight() / 2 -
@@ -176,7 +176,7 @@ int main() {
             points_texture.render(
                 screen_width / 2 - points_texture.getWidth() / 2,
                 screen_height / 2 - points_texture.getHeight() / 2);
-            SDL_RenderPresent(gRenderer);
+            SDL_RenderPresent(Game::gRenderer);
             continue;
         }
 
@@ -185,7 +185,7 @@ int main() {
             avgFPS = 0;
         }
 
-        pacman.move(board);
+        pacman.move(board, points);
         ghost.move(board, pacman);
         if (pacman.wasKilled()) {
             pacman.setLifesLeft(pacman.getLifesLeft() - 1);
@@ -216,8 +216,8 @@ int main() {
         fps_texture.loadText(fps_str.str(), black);
         livesLeft_texture.loadText(livesLeft_str.str(), black);
         // clear screen
-        SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 0xFF);
-        SDL_RenderClear(gRenderer);
+        SDL_SetRenderDrawColor(Game::gRenderer, 0, 0, 0, 0xFF);
+        SDL_RenderClear(Game::gRenderer);
 
         board.render();
         points_texture.render(10,
@@ -235,7 +235,7 @@ int main() {
         }
 
         // update screen
-        SDL_RenderPresent(gRenderer);
+        SDL_RenderPresent(Game::gRenderer);
         ++frames;
     }
 

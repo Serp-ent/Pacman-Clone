@@ -1,7 +1,5 @@
 #include "Board.h"
-
-// HACK: maybe use a common header
-extern SDL_Renderer *gRenderer;
+#include "Game.h"
 
 void Board::render() {
     SDL_Point box{border.x, border.y};
@@ -14,6 +12,6 @@ void Board::render() {
         box.y += Box::size;
     }
 
-    SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
-    SDL_RenderDrawRect(gRenderer, &border);
+    SDL_SetRenderDrawColor(Game::gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
+    SDL_RenderDrawRect(Game::gRenderer, &border);
 }

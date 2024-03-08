@@ -19,9 +19,6 @@
 // TODO: create level designer in SDL2 that creates textfile with map
 // TODO: use SDL functions with unique_ptr
 
-constexpr int screen_width = 800;
-constexpr int screen_height = 600;
-
 int points = 0;
 int totalPoints = 0;
 
@@ -52,81 +49,8 @@ Board createLevel1() {
     return level;
 }
 
-bool init_game() {
-    bool success = true;
-    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-        std::printf("SDL could not initialize! SDL Error: %s\n",
-                    SDL_GetError());
-        return false;
-    }
-    Game::gWindow = SDL_CreateWindow("Pacman", SDL_WINDOWPOS_CENTERED,
-                                     SDL_WINDOWPOS_CENTERED, screen_width,
-                                     screen_height, SDL_WINDOW_SHOWN);
-    if (!Game::gWindow) {
-        std::printf("SDL could not create window! SDL Error: %s\n",
-                    SDL_GetError());
-        return false;
-    }
-
-    // create renderer for window
-    // TODO: check if we want to use VSYNC or just cap FPS
-    Game::gRenderer = SDL_CreateRenderer(Game::gWindow, -1,
-                                         SDL_RENDERER_ACCELERATED |
-                                             SDL_RENDERER_PRESENTVSYNC);
-    if (!Game::gRenderer) {
-        std::printf("Renderer could not be created! SDL Error: %s\n",
-                    SDL_GetError());
-        return false;
-    }
-
-    // Initialize renderer color
-    SDL_SetRenderDrawColor(Game::gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
-
-    // Initialize SDL_ttf
-    if (TTF_Init() == -1) {
-        std::printf("SDL_ttf could not initialize! SDL_ttf Error: %s\n",
-                    TTF_GetError());
-        success = false;
-    }
-
-    // Create window
-
-    return success;
-}
-
-bool load_media() {
-    bool success = true;
-
-    Game::gFont = TTF_OpenFont("./Oswald-VariableFont_wght.ttf", Box::size / 2);
-    if (!Game::gFont) {
-        std::printf("Failed to load font! SDL_ttf Error: %s\n", TTF_GetError());
-        success = false;
-    }
-
-    return success;
-}
-
-void close_game() {
-    TTF_CloseFont(Game::gFont);
-
-    SDL_DestroyRenderer(Game::gRenderer);
-    SDL_DestroyWindow(Game::gWindow);
-
-    // quit subsystems
-    TTF_Quit();
-    SDL_Quit();
-}
-
 int main() {
-    if (!init_game()) {
-        std::printf("Failed to initialize!\n");
-        return 1;
-    }
-
-    if (!load_media()) {
-        std::printf("Failed to load media!\n");
-        return 1;
-    }
+    Game game;
 
     std::printf("Successfuly set up game\n");
     bool quit = false;
@@ -170,12 +94,13 @@ int main() {
             SDL_SetRenderDrawColor(Game::gRenderer, 0, 0, 0, 0xFF);
             SDL_RenderClear(Game::gRenderer);
 
-            theEndText.render(screen_width / 2 - theEndText.getWidth() / 2,
-                              screen_height / 2 - theEndText.getHeight() / 2 -
-                                  points_texture.getHeight());
+            theEndText.render(
+                Game::screen_width / 2 - theEndText.getWidth() / 2,
+                Game::screen_height / 2 - theEndText.getHeight() / 2 -
+                    points_texture.getHeight());
             points_texture.render(
-                screen_width / 2 - points_texture.getWidth() / 2,
-                screen_height / 2 - points_texture.getHeight() / 2);
+                Game::screen_width / 2 - points_texture.getWidth() / 2,
+                Game::screen_height / 2 - points_texture.getHeight() / 2);
             SDL_RenderPresent(Game::gRenderer);
             continue;
         }
@@ -221,11 +146,11 @@ int main() {
 
         board.render();
         points_texture.render(10,
-                              screen_height - points_texture.getHeight() - 10);
-        fps_texture.render(screen_width - fps_texture.getWidth() - 10, 10);
+                              Game::screen_height - points_texture.getHeight() - 10);
+        fps_texture.render(Game::screen_width - fps_texture.getWidth() - 10, 10);
         livesLeft_texture.render(
-            screen_width - livesLeft_texture.getWidth() - 10,
-            screen_height - livesLeft_texture.getHeight() - 10);
+            Game::screen_width - livesLeft_texture.getWidth() - 10,
+            Game::screen_height - livesLeft_texture.getHeight() - 10);
 
         pacman.render();
         ghost.render();
@@ -238,8 +163,4 @@ int main() {
         SDL_RenderPresent(Game::gRenderer);
         ++frames;
     }
-
-    std::printf("Cleaning up game\n");
-
-    close_game();
 }

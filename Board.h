@@ -2,19 +2,16 @@
 #define PACMAN_BOARD_H
 
 #include <SDL2/SDL.h>
+#include "Game.h"
 #include <vector>
 #include "Box.h"
-
-// HACK: maybe use some common header
-extern const int screen_width;
-extern const int screen_height;
 
 class Board {
   public:
     Board(int w, int h)
         : rows_(h), columns_(h),
-          border{screen_width / 2 - (rows() * Box::size) / 2,
-                 screen_height / 2 - (columns() * Box::size) / 2,
+          border{Game::screen_width / 2 - (rows() * Box::size) / 2,
+                 Game::screen_height / 2 - (columns() * Box::size) / 2,
                  columns() * Box::size, rows() * Box::size},
           board_(w * h) {}
 

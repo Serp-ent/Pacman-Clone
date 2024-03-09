@@ -1,19 +1,23 @@
 #ifndef PACMAN_BOARD_H
 #define PACMAN_BOARD_H
 
-#include <SDL2/SDL.h>
-#include "Game.h"
-#include <vector>
 #include "Box.h"
+#include "Game.h"
+#include <SDL2/SDL.h>
+#include <string>
+#include <vector>
 
+// TODO: change name to Level
 class Board {
   public:
-    Board(int w, int h)
-        : rows_(h), columns_(h),
+    Board(int h, int w)
+        : rows_(h), columns_(w),
           border{Game::screen_width / 2 - (rows() * Box::size) / 2,
                  Game::screen_height / 2 - (columns() * Box::size) / 2,
                  columns() * Box::size, rows() * Box::size},
           board_(w * h) {}
+
+    Board(const std::string &filename);
 
     SDL_Point getPos() const {
         SDL_Point p{border.x, border.y};
@@ -24,13 +28,16 @@ class Board {
 
     int rows() const { return rows_; }
     int columns() const { return columns_; }
-    Box &getBox(int i, int j) { return board_.at(i * rows() + j); }
+    Box &getBox(int i, int j) { return board_.at(i * columns() + j); }
+
+    int getTotalPoints() const { return totalPoints; }
 
   private:
-    const int rows_;
-    const int columns_;
+    int rows_;
+    int columns_;
+    int totalPoints = 0;
 
-    const SDL_Rect border;
+    SDL_Rect border;
 
     std::vector<Box> board_;
 };

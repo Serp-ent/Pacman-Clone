@@ -22,204 +22,16 @@
 // TODO: create level designer in SDL2 that creates textfile with map
 // TODO: use SDL functions with unique_ptr
 
-int totalPoints = 0;
+int totalPoints = 100;
 
 // TODO: inherit from Enitty object
 // create GHOST enemy
-
-// TODO: don't return by copy
-// TODO: check ways to code board in file e.g ASCII or numbers
-Board createLevel1() {
-    // BUG: exception thrown when rows < columns
-    Board level(28, 28);
-    for (int i = 0; i < level.rows(); ++i) {
-        for (int j = 0; j < level.columns(); ++j) {
-            ++totalPoints;
-            level.getBox(i, j).setType(Box::Type::point);
-        }
-    }
-
-    // draw borders
-    for (int i = 0; i < level.rows(); ++i) {
-        level.getBox(i, 0).setType(Box::Type::wall);
-        level.getBox(i, level.columns() - 1).setType(Box::Type::wall);
-        --totalPoints;
-        --totalPoints;
-    }
-    for (int i = 0; i < level.columns(); ++i) {
-        level.getBox(0, i).setType(Box::Type::wall);
-        level.getBox(level.rows() - 1, i).setType(Box::Type::wall);
-        --totalPoints;
-        --totalPoints;
-    }
-
-    //*********************************************************************************
-
-    for (int i = 2; i < 6; ++i) {
-        for (int j = 2; j < 5; ++j) {
-            level.getBox(j, i).setType(Box::Type::wall);
-            --totalPoints;
-        }
-    }
-    for (int i = 7; i < 12; ++i) {
-        for (int j = 2; j < 5; ++j) {
-            level.getBox(j, i).setType(Box::Type::wall);
-            --totalPoints;
-        }
-    }
-
-    for (int i = 13; i < 15; ++i) {
-        for (int j = 1; j < 5; ++j) {
-            level.getBox(j, i).setType(Box::Type::wall);
-            --totalPoints;
-        }
-    }
-
-    for (int i = 16; i < 21; ++i) {
-        for (int j = 2; j < 5; ++j) {
-            level.getBox(j, i).setType(Box::Type::wall);
-            --totalPoints;
-        }
-    }
-    for (int i = 22; i < 26; ++i) {
-        for (int j = 2; j < 5; ++j) {
-            level.getBox(j, i).setType(Box::Type::wall);
-            --totalPoints;
-        }
-    }
-
-    //*********************************************************************************
-
-    for (int i = 2; i < 6; ++i) {
-        for (int j = 6; j < 8; ++j) {
-            level.getBox(j, i).setType(Box::Type::wall);
-            --totalPoints;
-        }
-    }
-    for (int i = 7; i < 9; ++i) {
-        for (int j = 6; j < 8; ++j) {
-            level.getBox(j, i).setType(Box::Type::wall);
-            --totalPoints;
-        }
-    }
-
-    for (int i = 10; i < 18; ++i) {
-        for (int j = 6; j < 8; ++j) {
-            level.getBox(j, i).setType(Box::Type::wall);
-            --totalPoints;
-        }
-    }
-
-    for (int i = 19; i < 21; ++i) {
-        for (int j = 6; j < 8; ++j) {
-            level.getBox(j, i).setType(Box::Type::wall);
-            --totalPoints;
-        }
-    }
-
-    for (int i = 22; i < 26; ++i) {
-        for (int j = 6; j < 8; ++j) {
-            level.getBox(j, i).setType(Box::Type::wall);
-            --totalPoints;
-        }
-    }
-
-    //*********************************************************************************
-
-    for (int i = 1; i < 6; ++i) {
-        for (int j = 9; j < 14; ++j) {
-            level.getBox(j, i).setType(Box::Type::wall);
-            --totalPoints;
-        }
-    }
-
-    for (int i = 9; i < 12; ++i) {
-        for (int j = 9; j < 11; ++j) {
-            level.getBox(j, i).setType(Box::Type::wall);
-            --totalPoints;
-        }
-    }
-    for (int i = 16; i < 19; ++i) {
-        for (int j = 9; j < 11; ++j) {
-            level.getBox(j, i).setType(Box::Type::wall);
-            --totalPoints;
-        }
-    }
-
-    for (int i = 7; i < 9; ++i) {
-        for (int j = 9; j < 14; ++j) {
-            level.getBox(j, i).setType(Box::Type::wall);
-            --totalPoints;
-        }
-    }
-
-    for (int i = 7; i < 9; ++i) {
-        level.getBox(8, i).setType(Box::Type::wall);
-        --totalPoints;
-    }
-    for (int i = 19; i < 21; ++i) {
-        level.getBox(8, i).setType(Box::Type::wall);
-        --totalPoints;
-    }
-    for (int i = 13; i < 15; ++i) {
-        level.getBox(8, i).setType(Box::Type::wall);
-        --totalPoints;
-    }
-    for (int i = 13; i < 15; ++i) {
-        for (int j = 9; j < 11; ++j) {
-            level.getBox(j, i).setType(Box::Type::wall);
-            --totalPoints;
-        }
-    }
-
-    for (int i = 19; i < 21; ++i) {
-        for (int j = 9; j < 14; ++j) {
-            level.getBox(j, i).setType(Box::Type::wall);
-            --totalPoints;
-        }
-    }
-
-    for (int i = 22; i < 27; ++i) {
-        for (int j = 9; j < 14; ++j) {
-            level.getBox(j, i).setType(Box::Type::wall);
-            --totalPoints;
-        }
-    }
-
-    //*********************************************************************************
-    // Draw box;
-    for (int i = 10; i < 18; ++i) {
-        if (i == 13 || i == 14) {
-            level.getBox(12, i).setType(Box::Type::empty);
-            continue;
-        }
-        level.getBox(12, i).setType(Box::Type::wall);
-    }
-    for (int i = 12; i < 16; ++i) {
-        level.getBox(i, 10).setType(Box::Type::wall);
-    }
-    for (int i = 10; i < 18; ++i) {
-        level.getBox(16, i).setType(Box::Type::wall);
-    }
-    for (int i = 12; i < 16; ++i) {
-        level.getBox(i, 17).setType(Box::Type::wall);
-    }
-
-    for (int i = 11; i < 17; ++i) {
-        for (int j = 13; j < 16; ++j) {
-            level.getBox(j, i).setType(Box::Type::empty);
-        }
-    }
-    //*********************************************************************************
-
-    return level;
-}
 
 int main() {
     Game game;
     bool quit = false;
     SDL_Event e;
-    Board board = createLevel1();
+    Board board("./level1.txt");
 
     SDL_Point start_pos = board.getPos();
     // TODO: change pacman start position to be inside box
@@ -320,7 +132,7 @@ int main() {
             start_pos.y += (13 * Box::size);
             ghost = Ghost(start_pos.x, start_pos.y);
 
-        } else if (game.get_points() == totalPoints) {
+        } else if (game.get_points() == board.getTotalPoints()) {
             game.setEnd();
         } else {
             pacman.move(board);

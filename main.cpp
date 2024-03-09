@@ -1,6 +1,7 @@
 #include "Board.h"
 #include "Box.h"
 #include "Ghost.h"
+#include "Hud.h"
 #include "Pacman.h"
 #include "TextTexture.h"
 #include "Timer.h"
@@ -13,6 +14,8 @@
 #include <vector>
 
 #include "Game.h"
+
+// TODO: maybe use a namespace to limit namespace pollution
 
 // TODO: create MENU and HUD
 
@@ -64,17 +67,12 @@ int main() {
                 start_pos.y + (board.columns() - 1) * Box::size);
 
     // TODO: create HUD class
-    TextTexture points_texture;
-    TextTexture fps_texture;
-    TextTexture livesLeft_texture;
-    std::ostringstream livesLeft_str;
-    std::ostringstream points_str;
-    std::ostringstream fps_str;
     SDL_Color black{0xFF, 0xFF, 0xFF, 0xFF};
 
     TextTexture theEndText;
     theEndText.loadText("The END", black);
 
+    Hud hud;
     Timer fpsTimer;
     int frames = 0;
     fpsTimer.start();
@@ -93,10 +91,10 @@ int main() {
             theEndText.render(
                 Game::screen_width / 2 - theEndText.getWidth() / 2,
                 Game::screen_height / 2 - theEndText.getHeight() / 2 -
-                    points_texture.getHeight());
-            points_texture.render(
-                Game::screen_width / 2 - points_texture.getWidth() / 2,
-                Game::screen_height / 2 - points_texture.getHeight() / 2);
+                    hud.points_texture.getHeight());
+            hud.points_texture.render(
+                Game::screen_width / 2 - hud.points_texture.getWidth() / 2,
+                Game::screen_height / 2 - hud.points_texture.getHeight() / 2);
             SDL_RenderPresent(Game::gRenderer);
             continue;
         }
@@ -127,29 +125,17 @@ int main() {
             game.setEnd();
         }
 
-        points_str.str("");
-        points_str << "Points: " << game.get_points();
-        fps_str.str("");
-        fps_str << "FPS: " << static_cast<int>(avgFPS);
-        // TODO: change this texture only when pacman is killed
-        livesLeft_str.str("");
-        livesLeft_str << "Lives: " << pacman.getLifesLeft();
+        hud.setPoints(game.get_points());
+        hud.setFps(static_cast<int>(avgFPS));
+        hud.setLivesLeft(pacman.getLifesLeft());
 
-        points_texture.loadText(points_str.str(), black);
-        fps_texture.loadText(fps_str.str(), black);
-        livesLeft_texture.loadText(livesLeft_str.str(), black);
         // clear screen
         SDL_SetRenderDrawColor(Game::gRenderer, 0, 0, 0, 0xFF);
         SDL_RenderClear(Game::gRenderer);
 
+        hud.render();
+
         board.render();
-        points_texture.render(10, Game::screen_height -
-                                      points_texture.getHeight() - 10);
-        fps_texture.render(Game::screen_width - fps_texture.getWidth() - 10,
-                           10);
-        livesLeft_texture.render(
-            Game::screen_width - livesLeft_texture.getWidth() - 10,
-            Game::screen_height - livesLeft_texture.getHeight() - 10);
 
         pacman.render();
         ghost.render();

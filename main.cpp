@@ -82,7 +82,9 @@ int main() {
                 quit = true;
             }
 
-            pacman.handleEvent(e);
+            if (!pacman.playsDeathAnimation()) {
+                pacman.handleEvent(e);
+            }
         }
         if (game.isEnd()) {
             SDL_SetRenderDrawColor(Game::gRenderer, 0, 0, 0, 0xFF);
@@ -105,27 +107,6 @@ int main() {
             avgFPS = 0;
         }
 
-        pacman.move(board);
-        ghost.move(board, pacman);
-        if (pacman.wasKilled()) {
-            pacman.setLifesLeft(pacman.getLifesLeft() - 1);
-
-            if (pacman.getLifesLeft() == 0) {
-                game.setEnd();
-                continue;
-            }
-            // TODO: set position (the map/level should know where pacman
-            // and ghost start position is)
-            int lives = pacman.getLifesLeft();
-            // HACK: reset pacman and ghost position
-            pacman = Pacman(game.get_points_ref(), start_pos.x, start_pos.y);
-            pacman.setLifesLeft(lives);
-            ghost = Ghost(start_pos.x + (board.rows() - 1) * Box::size,
-                          start_pos.y + (board.columns() - 1) * Box::size);
-        } else if (game.get_points() == totalPoints) {
-            game.setEnd();
-        }
-
         hud.setPoints(game.get_points());
         hud.setFps(static_cast<int>(avgFPS));
         hud.setLivesLeft(pacman.getLifesLeft());
@@ -144,5 +125,31 @@ int main() {
         // update screen
         SDL_RenderPresent(Game::gRenderer);
         ++frames;
+
+        if (pacman.wasKilled()) {
+            if (pacman.playsDeathAnimation()) {
+                continue;
+            }
+
+            pacman.setLifesLeft(pacman.getLifesLeft() - 1);
+
+            if (pacman.getLifesLeft() == 0) {
+                game.setEnd();
+                continue;
+            }
+            // TODO: set position (the map/level should know where pacman
+            // and ghost start position is)
+            int lives = pacman.getLifesLeft();
+            // HACK: reset pacman and ghost position
+            pacman = Pacman(game.get_points_ref(), start_pos.x, start_pos.y);
+            pacman.setLifesLeft(lives);
+            ghost = Ghost(start_pos.x + (board.rows() - 1) * Box::size,
+                          start_pos.y + (board.columns() - 1) * Box::size);
+        } else if (game.get_points() == totalPoints) {
+            game.setEnd();
+        } else {
+            pacman.move(board);
+            ghost.move(board, pacman);
+        }
     }
 }

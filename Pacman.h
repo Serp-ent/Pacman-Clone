@@ -16,8 +16,11 @@ class Pacman {
 
     // TODO: create sprite class
     static LTexture sprite;
+
     static constexpr int frames = 2;
     static SDL_Rect spriteClips[frames];
+    static constexpr int deathFrames = 11;
+    static SDL_Rect deathSpriteClips[deathFrames];
 
     Pacman(int &points)
         : points{&points}, texture({0, 0, width, height}), isDead(false),
@@ -35,6 +38,8 @@ class Pacman {
     bool wasKilled() const { return isDead; }
     void clearState(bool death = false) { isDead = death; }
 
+    bool playsDeathAnimation() { return playsAnimation; }
+
     int getLifesLeft() const { return livesLeft; }
     void setLifesLeft(int lives) { livesLeft = lives; }
 
@@ -46,6 +51,7 @@ class Pacman {
     int angle_of_ratation = 0;
 
     bool isDead = false;
+    bool playsAnimation = false;
     int livesLeft = 3;
 
     int velocity_x;

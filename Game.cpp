@@ -65,10 +65,18 @@ void Game::load_media() {
     }
 
     // TODO: create pacman sprite size instead of magic constant
-    Pacman::spriteClips[0] = {1, 0, 16 + 1, 16};
-    Pacman::spriteClips[1] = {16 + 1, 0, 16, 16};
+    SDL_Point pos{1, 1};
+    for (int i = 0; i < Pacman::frames; ++i) {
+        Pacman::spriteClips[i] = {pos.x, pos.y, 16, 16};
+        pos.x += 16;
+    }
+    pos.x += 16;  // WARNING: full ball sprite is skipped
+    for (int i = 0; i < Pacman::deathFrames; ++i) {
+        Pacman::deathSpriteClips[i] = {pos.x, pos.y, 16, 16};
+        pos.x += 16;
+    }
 
-    SDL_Point pos{1, 4 * 16 + 1};
+    pos = SDL_Point{1, 4 * 16 + 1};
     for (int i = 0; i < Ghost::frames; ++i) {
         Ghost::spriteClips[i] = {pos.x, pos.y, 16, 16};
         pos.x += 16;

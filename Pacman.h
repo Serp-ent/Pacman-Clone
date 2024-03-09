@@ -42,6 +42,7 @@ class Pacman {
     // TODO: add sprite
     SDL_Rect texture;
     SDL_Rect *currRect = &spriteClips[0];
+    int angle_of_ratation = 0;
 
     bool isDead = false;
     int livesLeft = 3;

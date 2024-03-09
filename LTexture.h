@@ -21,7 +21,9 @@ class LTexture {
     // Renders texture at given point
     void render(int x, int y);
     void render(int x, int y, SDL_Rect *clip);
-    void render(int x, int y, SDL_Rect& srcRect, SDL_Rect &clip);
+    void render(int x, int y, SDL_Rect &srcRect, SDL_Rect &clip);
+    void render(int x, int y, SDL_Rect &srcRect, SDL_Rect &destRect,
+                double angle);
 
     // Gets image dimensions
     int getWidth();

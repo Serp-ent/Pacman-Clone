@@ -70,17 +70,21 @@ void Pacman::handleEvent(SDL_Event &e) {
         switch (e.key.keysym.sym) {
         case SDLK_UP:
             velocity_y = -velocity;
+            angle_of_ratation = 3 * 90;
             velocity_x = 0;
             break;
         case SDLK_DOWN:
             velocity_y = velocity;
+            angle_of_ratation = 1 * 90;
             velocity_x = 0;
             break;
         case SDLK_RIGHT:
+            angle_of_ratation = 0;
             velocity_y = 0;
             velocity_x = velocity;
             break;
         case SDLK_LEFT:
+            angle_of_ratation = 2 * 90;
             velocity_y = 0;
             velocity_x = -velocity;
             break;
@@ -109,5 +113,5 @@ void Pacman::render() {
     }
     currRect = &Pacman::spriteClips[frame / 5];
 
-    sprite.render(texture.x, texture.y, *currRect, texture);
+    sprite.render(texture.x, texture.y, *currRect, texture, angle_of_ratation);
 }

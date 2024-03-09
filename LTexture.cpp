@@ -3,6 +3,7 @@
 
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_rect.h>
+#include <SDL2/SDL_render.h>
 
 LTexture::LTexture() {
     // Initialize
@@ -71,6 +72,13 @@ void LTexture::render(int x, int y) {
 void LTexture::render(int x, int y, SDL_Rect &srcRect, SDL_Rect &destRect) {
     // Render to screen
     SDL_RenderCopy(Game::gRenderer, mTexture, &srcRect, &destRect);
+}
+
+void LTexture::render(int x, int y, SDL_Rect &srcRect, SDL_Rect &destRect,
+                      double angle) {
+    // Render to screen
+    SDL_RenderCopyEx(Game::gRenderer, mTexture, &srcRect, &destRect, angle,
+                     nullptr, SDL_FLIP_NONE);
 }
 
 void LTexture::render(int x, int y, SDL_Rect *clip) {

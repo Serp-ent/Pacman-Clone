@@ -9,8 +9,8 @@ class Board;
 // TODO: Maybe use observer pattern
 class Pacman {
   public:
-    static constexpr int height = 30;
-    static constexpr int width = 30;
+    static constexpr int height = 40;
+    static constexpr int width = 40;
     static constexpr int velocity = 2;
 
     // TODO: create sprite class

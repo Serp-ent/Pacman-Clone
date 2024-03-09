@@ -5,7 +5,7 @@
 void Box::render(int x, int y) {
     SDL_Rect r{x, y, size, size};
 
-    SDL_SetRenderDrawColor(Game::gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
+    SDL_SetRenderDrawColor(Game::gRenderer, 0, 0, 0, 0xFF);
     SDL_RenderFillRect(Game::gRenderer, &r);
 
     switch (type_) {
@@ -13,13 +13,13 @@ void Box::render(int x, int y) {
         SDL_SetRenderDrawColor(Game::gRenderer, 0xFF, 0, 0, 0xFF);
         break;
     case Type::wall:
-        SDL_SetRenderDrawColor(Game::gRenderer, 0, 0, 0, 0xFF);
+        SDL_SetRenderDrawColor(Game::gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
         break;
     case Type::point:
         SDL_SetRenderDrawColor(Game::gRenderer, 0xFF, 0xFF, 0, 0xFF);
         break;
     case Type::empty:
-        SDL_SetRenderDrawColor(Game::gRenderer, 0xFF, 0xFF, 0xFF, 0xF);
+        SDL_SetRenderDrawColor(Game::gRenderer, 0, 0, 0, 0xF);
         break;
     }
 

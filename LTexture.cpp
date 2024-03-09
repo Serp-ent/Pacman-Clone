@@ -17,6 +17,7 @@ LTexture::~LTexture() {
     free();
 }
 
+// TODO: take reference instead of copy-by-value
 bool LTexture::loadFromFile(std::string path) {
     // Get rid of preexisting texture
     free();
@@ -31,7 +32,7 @@ bool LTexture::loadFromFile(std::string path) {
     } else {
         // Color key image
         SDL_SetColorKey(loadedSurface, SDL_TRUE,
-                        SDL_MapRGB(loadedSurface->format, 0, 0xFF, 0xFF));
+                        SDL_MapRGB(loadedSurface->format, 0, 0, 0));
         // Create texture from surface pixels
         newTexture =
             SDL_CreateTextureFromSurface(Game::gRenderer, loadedSurface);

@@ -52,7 +52,7 @@ Game::Game() {
 }
 
 void Game::load_media() {
-    Game::gFont = TTF_OpenFont("./Oswald-VariableFont_wght.ttf", Box::size / 2);
+    Game::gFont = TTF_OpenFont("./Oswald-VariableFont_wght.ttf", Box::size);
     if (!Game::gFont) {
         std::printf("Failed to load font! SDL_ttf Error: %s\n", TTF_GetError());
         throw std::runtime_error{"Failed to load font"};

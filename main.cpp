@@ -48,7 +48,7 @@ int main() {
     SDL_Color black{0xFF, 0xFF, 0xFF, 0xFF};
 
     TextTexture theEndText;
-    theEndText.loadText("The END", black);
+    theEndText.loadText("Game over", black);
 
     Hud hud;
     Timer fpsTimer;
@@ -70,16 +70,10 @@ int main() {
         if (game.isEnd()) {
             SDL_SetRenderDrawColor(Game::gRenderer, 0, 0, 0, 0xFF);
             SDL_RenderClear(Game::gRenderer);
+            theEndText.render(
+                Game::screen_width / 2 - theEndText.getWidth() / 2,
+                Game::screen_height / 2 - theEndText.getHeight() / 2);
 
-            std::printf("Game has ended\n");
-            // theEndText.render(
-            //     Game::screen_width / 2 - theEndText.getWidth() / 2,
-            //     Game::screen_height / 2 - theEndText.getHeight() / 2 -
-            //         hud.points_texture.getHeight());
-            // hud.points_texture.render(
-            //     Game::screen_width / 2 - hud.points_texture.getWidth() /
-            //     2, Game::screen_height / 2 -
-            //     hud.points_texture.getHeight() / 2);
             SDL_RenderPresent(Game::gRenderer);
             continue;
         }

@@ -71,6 +71,7 @@ int main() {
             SDL_SetRenderDrawColor(Game::gRenderer, 0, 0, 0, 0xFF);
             SDL_RenderClear(Game::gRenderer);
 
+            std::printf("Game has ended\n");
             // theEndText.render(
             //     Game::screen_width / 2 - theEndText.getWidth() / 2,
             //     Game::screen_height / 2 - theEndText.getHeight() / 2 -
@@ -128,10 +129,10 @@ int main() {
             pacman = Pacman(game.get_points_ref(), start_pos.x, start_pos.y);
             pacman.setLifesLeft(lives);
 
+            start_pos = board.getPos();
             start_pos.x += (board.columns() / 2 * Box::size);
             start_pos.y += (13 * Box::size);
             ghost = Ghost(start_pos.x, start_pos.y);
-
         } else if (game.get_points() == board.getTotalPoints()) {
             game.setEnd();
         } else {

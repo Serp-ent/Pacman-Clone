@@ -14,8 +14,8 @@ class Game {
     static SDL_Renderer *gRenderer;
     static TTF_Font *gFont;
 
-    static constexpr int screen_width = 800;
-    static constexpr int screen_height = 600;
+    static constexpr int screen_width = 1280;
+    static constexpr int screen_height = 960;
 
     Game();
 

@@ -10,8 +10,8 @@ class Board;
 class Pacman {
   public:
     // TODO: Default height should be 16px and it should be multiplied by scale
-    static constexpr int height = 40;
-    static constexpr int width = 40;
+    static constexpr int height = 30;
+    static constexpr int width = 30;
     static constexpr int velocity = 2;
 
     // TODO: create sprite class

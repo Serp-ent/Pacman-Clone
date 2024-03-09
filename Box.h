@@ -5,7 +5,7 @@
 
 class Box {
   public:
-    static constexpr int size = Pacman::height + 10;
+    static constexpr int size = Pacman::height;
     enum class Type : int8_t { wall, point, super_point, empty };
 
     void render(int x, int y);

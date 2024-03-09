@@ -1,17 +1,33 @@
 #include "Ghost.h"
 
 #include "Board.h"
+#include "Game.h"
 #include "utils.h"
 #include <SDL2/SDL_render.h>
-#include "Game.h"
 
-void Ghost::render() const {
-    // more rendering
-    SDL_SetRenderDrawColor(Game::gRenderer, 0xFF, 0, 0, 0xAA);
-    SDL_RenderFillRect(Game::gRenderer, &texture);
+SDL_Rect Ghost::spriteClips[Ghost::frames];
 
-    SDL_SetRenderDrawColor(Game::gRenderer, 0, 0, 0, 0xFF);
-    SDL_RenderDrawRect(Game::gRenderer, &texture);
+void Ghost::render() {
+    // // more rendering
+    // SDL_SetRenderDrawColor(Game::gRenderer, 0xFF, 0, 0, 0xAA);
+    // SDL_RenderFillRect(Game::gRenderer, &texture);
+
+    // SDL_SetRenderDrawColor(Game::gRenderer, 0, 0, 0, 0xFF);
+    // SDL_RenderDrawRect(Game::gRenderer, &texture);
+    static int frame = 0;
+
+    // TODO: frame speed scale
+    // instead of magic number;
+
+    ++frame;
+    // each direciton have only 2 sprites
+    if (frame / 5 >= 2) {
+        frame = 0;
+    }
+
+    currSprite = &Ghost::spriteClips[directionSprite + (frame / 5)];
+
+    Pacman::sprite.render(texture.x, texture.y, *currSprite, texture);
 }
 
 void Ghost::move(Board &b, Pacman &pacman) {
@@ -20,20 +36,25 @@ void Ghost::move(Board &b, Pacman &pacman) {
     static int moveNumber = 0;
     if (moveNumber == 40) {
         int direction = random();
-        // TODO: velocity 
+        // TODO: velocity
+        // TODO: get rid of magic constants
         velocity_y = 0;
         velocity_x = 0;
         switch (direction % 4) {
         case 0:
+            directionSprite = 0;
             velocity_x += 2;
             break;
         case 1:
+            directionSprite = 2;
             velocity_x -= 2;
             break;
         case 2:
+            directionSprite = 4;
             velocity_y -= 2;
             break;
         case 3:
+            directionSprite = 6;
             velocity_y += 2;
             break;
         }

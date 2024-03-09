@@ -1,5 +1,6 @@
 #include "Game.h"
 
+#include "Ghost.h"
 #include "SDL2/SDL_image.h"
 
 // TODO: check if we can have unique_ptr provided method
@@ -64,8 +65,14 @@ void Game::load_media() {
     }
 
     // TODO: create pacman sprite size instead of magic constant
-    Pacman::spriteClips[0] = {0, 0, 16, 16};
-    Pacman::spriteClips[1] = {16, 0, 16, 16};
+    Pacman::spriteClips[0] = {1, 0, 16 + 1, 16};
+    Pacman::spriteClips[1] = {16 + 1, 0, 16, 16};
+
+    SDL_Point pos{1, 4 * 16 + 1};
+    for (int i = 0; i < Ghost::frames; ++i) {
+        Ghost::spriteClips[i] = {pos.x, pos.y, 16, 16};
+        pos.x += 16;
+    }
 }
 
 void Game::close_game() {

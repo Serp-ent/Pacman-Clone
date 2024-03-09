@@ -9,6 +9,7 @@ class Board;
 // TODO: Maybe use observer pattern
 class Pacman {
   public:
+    // TODO: Default height should be 16px and it should be multiplied by scale
     static constexpr int height = 40;
     static constexpr int width = 40;
     static constexpr int velocity = 2;

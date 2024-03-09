@@ -4,6 +4,10 @@
 #include "utils.h"
 
 #include "Game.h"
+#include <SDL2/SDL_rect.h>
+
+LTexture Pacman::sprite{};
+SDL_Rect Pacman::spriteClips[Pacman::frames];
 
 void Pacman::move(Board &b) {
     SDL_Rect border{b.getPos().x, b.getPos().y, b.columns() * Box::size,
@@ -84,11 +88,26 @@ void Pacman::handleEvent(SDL_Event &e) {
     }
 }
 
-void Pacman::render() const {
+void Pacman::render() {
     // more rendering
-    SDL_SetRenderDrawColor(Game::gRenderer, 0xFF, 0xFF, 0, 0xFF);
-    SDL_RenderFillRect(Game::gRenderer, &texture);
+    // SDL_SetRenderDrawColor(Game::gRenderer, 0xFF, 0xFF, 0, 0xFF);
+    // SDL_RenderFillRect(Game::gRenderer, &texture);
 
-    SDL_SetRenderDrawColor(Game::gRenderer, 0, 0, 0, 0xFF);
-    SDL_RenderDrawRect(Game::gRenderer, &texture);
+    // SDL_SetRenderDrawColor(Game::gRenderer, 0, 0, 0, 0xFF);
+    // SDL_RenderDrawRect(Game::gRenderer, &texture);
+    // Set clip rendering dimensions
+    // Render to screen
+
+    static int frame = 0;
+
+    // TODO: frame speed scale
+    // instead of magic number;
+
+    ++frame;
+    if (frame / 5 >= Pacman::frames) {
+        frame = 0;
+    }
+    currRect = &Pacman::spriteClips[frame / 5];
+
+    sprite.render(texture.x, texture.y, *currRect, texture);
 }

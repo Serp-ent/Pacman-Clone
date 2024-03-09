@@ -1,5 +1,7 @@
 #include "Game.h"
 
+#include "SDL2/SDL_image.h"
+
 // TODO: check if we can have unique_ptr provided method
 // that closes in dtor
 SDL_Window *Game::gWindow = nullptr;
@@ -54,6 +56,16 @@ void Game::load_media() {
         std::printf("Failed to load font! SDL_ttf Error: %s\n", TTF_GetError());
         throw std::runtime_error{"Failed to load font"};
     }
+
+    if (!Pacman::sprite.loadFromFile("./pacman_sprite.png")) {
+        std::printf("Failed to pacman sprite! SDL_ttf Error: %s\n",
+                    IMG_GetError());
+        throw std::runtime_error{"Failed to load pacman sprite"};
+    }
+
+    // TODO: create pacman sprite size instead of magic constant
+    Pacman::spriteClips[0] = {0, 0, 16, 16};
+    Pacman::spriteClips[1] = {16, 0, 16, 16};
 }
 
 void Game::close_game() {

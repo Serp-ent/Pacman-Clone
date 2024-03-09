@@ -20,6 +20,7 @@ void Ghost::move(Board &b, Pacman &pacman) {
     static int moveNumber = 0;
     if (moveNumber == 40) {
         int direction = random();
+        // TODO: velocity 
         velocity_y = 0;
         velocity_x = 0;
         switch (direction % 4) {

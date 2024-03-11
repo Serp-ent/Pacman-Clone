@@ -1,10 +1,12 @@
 #ifndef PACMAN_PACMAN_H
 #define PACMAN_PACMAN_H
 
+#include "Behaviors.h"
 #include "Ghost.h"
 #include "LTexture.h"
 #include "Timer.h"
 #include <SDL2/SDL.h>
+#include <memory>
 
 class Board;
 
@@ -33,8 +35,9 @@ class Pacman {
           velocity_x{0}, velocity_y{0} {}
 
     void handleEvent(SDL_Event &e);
-    void move(Board &b, Ghost &g);
     void render();
+
+    void move(Board &b, Ghost &g);
 
     const SDL_Rect &getCollision() const { return texture; }
 
@@ -53,6 +56,10 @@ class Pacman {
     bool isStarted() { return started; }
 
   private:
+    friend class PacmanDefaultBehavior;
+    friend class PacmanSuperPointBehavior;
+    std::unique_ptr<Behavior> behavior{new PacmanDefaultBehavior(*this)};
+
     int *points = nullptr;
     // TODO: add sprite
     SDL_Rect texture;

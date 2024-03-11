@@ -44,7 +44,12 @@ class Pacman : public Entity {
     bool playsDeathAnimation() { return playsAnimation; }
 
     int getLifesLeft() const { return livesLeft; }
-    void setLifesLeft(int lives) { livesLeft = lives; }
+    void setLifesLeft(int lives) {
+        livesLeft = lives;
+        if (livesLeft > 0) {
+            clearState(); // make him alive
+        }
+    }
 
     // start means user presses key to start moving pacman
     void start() { started = true; }

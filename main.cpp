@@ -134,13 +134,14 @@ int main() {
             start_pos = board.getPos();
             start_pos.x += (board.columns() / 2 * Box::size - Box::size / 2);
             start_pos.y += (board.rows() * Box::size - 8 * Box::size);
-            pacman = Pacman(game.get_points_ref(), start_pos.x, start_pos.y);
+
+            pacman.setPos(start_pos);
             pacman.setLifesLeft(lives);
 
             start_pos = board.getPos();
             start_pos.x += (board.columns() / 2 * Box::size);
             start_pos.y += (13 * Box::size);
-            ghost = Ghost(start_pos.x, start_pos.y);
+            ghost.setPos(start_pos);
 
             pacman.stop();
         } else if (game.get_points() == board.getTotalPoints()) {

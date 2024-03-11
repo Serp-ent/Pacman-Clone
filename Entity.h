@@ -1,6 +1,7 @@
 #ifndef PACMAN_ENTITY_H
 #define PACMAN_ENTITY_H
 #include "SDL2/SDL.h"
+#include <SDL2/SDL_rect.h>
 #include <memory>
 
 class Board;
@@ -13,12 +14,20 @@ class Entity {
     // default velocity
     static constexpr int velocity = 2;
 
+    virtual ~Entity() {}
     virtual void move(Board &b, Entity &e) = 0;
     virtual void render() = 0;
 
     virtual const SDL_Rect &getCollision() const { return texture; }
 
-    // TODO: add get pos
+    SDL_Point getPos() const {
+        SDL_Point p{texture.x, texture.y};
+        return p;
+    }
+    void setPos(SDL_Point &p) {
+        texture.x = p.x;
+        texture.y = p.y;
+    }
 
     bool wasKilled() const { return isDead; }
     void clearState(bool death = false) { isDead = death; }

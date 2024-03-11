@@ -84,6 +84,10 @@ void Game::load_media() {
         Ghost::spriteClips[i] = {pos.x, pos.y, 16, 16};
         pos.x += 16;
     }
+    for (int i = 0; i < Ghost::runningAwayFrames; ++i) {
+        Ghost::runningAwayClips[i] = {pos.x, pos.y, 16, 16};
+        pos.x += 16;
+    }
 }
 
 void Game::close_game() {

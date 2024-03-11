@@ -1,7 +1,9 @@
 #ifndef PACMAN_PACMAN_H
 #define PACMAN_PACMAN_H
 
+#include "Ghost.h"
 #include "LTexture.h"
+#include "Timer.h"
 #include <SDL2/SDL.h>
 
 class Board;
@@ -31,7 +33,7 @@ class Pacman {
           velocity_x{0}, velocity_y{0} {}
 
     void handleEvent(SDL_Event &e);
-    void move(Board &b);
+    void move(Board &b, Ghost &g);
     void render();
 
     const SDL_Rect &getCollision() const { return texture; }
@@ -61,6 +63,8 @@ class Pacman {
     bool playsAnimation = false;
     int livesLeft = 3;
     bool started = false;
+
+    Timer attackerTime;
 
     int velocity_x;
     int velocity_y;

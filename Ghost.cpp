@@ -6,6 +6,7 @@
 #include <SDL2/SDL_render.h>
 
 SDL_Rect Ghost::spriteClips[Ghost::frames];
+SDL_Rect Ghost::runningAwayClips[Ghost::runningAwayFrames];
 
 void Ghost::render() {
     // // more rendering
@@ -20,12 +21,19 @@ void Ghost::render() {
     // instead of magic number;
 
     ++frame;
-    // each direciton have only 2 sprites
-    if (frame / 5 >= 2) {
-        frame = 0;
-    }
+    if (attacker) {
+        // each direciton have only 2 sprites
+        if (frame / 5 >= 2) {
+            frame = 0;
+        }
 
-    currSprite = &Ghost::spriteClips[directionSprite + (frame / 5)];
+        currSprite = &Ghost::spriteClips[directionSprite + frame / 5];
+    } else {
+        if (frame / 8 >= Ghost::runningAwayFrames) {
+            frame = 0;
+        }
+        currSprite = &Ghost::runningAwayClips[frame / 8];
+    }
 
     Pacman::sprite.render(texture.x, texture.y, *currSprite, texture);
 }

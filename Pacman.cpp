@@ -1,17 +1,19 @@
 #include "Pacman.h"
 
 #include "Board.h"
+#include "Ghost.h"
 #include "utils.h"
 
 #include "Game.h"
 #include <SDL2/SDL_rect.h>
+#include <cstdio>
 
 LTexture Pacman::sprite{};
 SDL_Rect Pacman::spriteClips[Pacman::frames];
 SDL_Rect Pacman::deathSpriteClips[Pacman::deathFrames];
 SDL_Rect Pacman::notStartedClip;
 
-void Pacman::move(Board &b) {
+void Pacman::move(Board &b, Ghost &ghost) {
     SDL_Rect border{b.getPos().x, b.getPos().y, b.columns() * Box::size,
                     b.rows() * Box::size};
 
@@ -22,6 +24,12 @@ void Pacman::move(Board &b) {
     // and check if we can enter them
     SDL_Point texture_center = {texture.x + Pacman::width / 2,
                                 texture.y + Pacman::height / 2};
+
+    if (attackerTime.getTicks() > 5'000) {
+        attackerTime.stop();
+        std::printf("Pacman is now chased\n");
+        ghost.setAttack();
+    }
 
     int i = (texture_center.x - b.getPos().x) / Box::size;
     int j = (texture_center.y - b.getPos().y) / Box::size;
@@ -56,10 +64,21 @@ void Pacman::move(Board &b) {
         }
     }
 
-    Box *box = nullptr;
-    if (((box = pointIsReached(texture, b, Box::Type::point)) != nullptr) ||
-        (box = pointIsReached(texture, b, Box::Type::super_point)) != nullptr) {
+    Box *box = pointIsReached(texture, b, Box::Type::point);
+    if (box != nullptr) {
+        ++*points;
+        // change pacman move behavior for 5seconds (now he is attacker)
+        // change ghost move behavior for 5seconds (now they are running away)
+        // TODO: emmit sound for eating ball point
+        box->setType(Box::Type::empty);
+        return;
+    }
 
+    box = pointIsReached(texture, b, Box::Type::super_point);
+    if (box != nullptr) {
+        std::printf("Super point reached\n");
+        ghost.setAttack(false);
+        attackerTime.start();
         ++*points;
         // TODO: emmit sound for eating ball point
         box->setType(Box::Type::empty);

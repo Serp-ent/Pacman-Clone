@@ -145,7 +145,7 @@ int main() {
         } else if (game.get_points() == board.getTotalPoints()) {
             game.setEnd();
         } else {
-            pacman.move(board);
+            pacman.move(board, ghost);
             ghost.move(board, pacman);
         }
     }

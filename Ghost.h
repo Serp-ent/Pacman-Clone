@@ -17,8 +17,11 @@ class Ghost {
     static constexpr int width = 30;
     static constexpr int velocity = 2;
 
+    // TODO: clips should be in one array accessed by macros for each state
     static constexpr int frames = 10;
     static SDL_Rect spriteClips[frames];
+    static constexpr int runningAwayFrames = 2;
+    static SDL_Rect runningAwayClips[runningAwayFrames];
 
     Ghost() : texture({0, 0, width, height}), velocity_x{0}, velocity_y{0} {}
     Ghost(int x, int y)
@@ -27,11 +30,15 @@ class Ghost {
     void move(Board &b, Pacman &pacman);
     void render();
 
+    void setAttack(bool attack = true) { attacker = attack; }
+    bool getAttack() const { return attacker; }
+
   private:
     // TODO: add sprite
     SDL_Rect texture;                       // collision box
     SDL_Rect *currSprite = &spriteClips[0]; // collision box
     int directionSprite = 0;
+    int attacker = true;
 
     int velocity_x;
     int velocity_y;

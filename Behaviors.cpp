@@ -3,6 +3,7 @@
 #include "Board.h"
 #include "SDL2/SDL.h"
 #include "utils.h"
+#include <cstdio>
 
 void PacmanDefaultBehavior::move(Board &b) {
     SDL_Rect border{b.getPos().x, b.getPos().y, b.columns() * Box::size,
@@ -19,7 +20,7 @@ void PacmanDefaultBehavior::move(Board &b) {
     if (pacman.attackerTime.getTicks() > 5'000) {
         pacman.attackerTime.stop();
         std::printf("Pacman is now chased\n");
-        // TODO:
+        // FIXME:
         // ghost.setAttack();
     }
 

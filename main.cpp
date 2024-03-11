@@ -36,6 +36,7 @@ int main() {
     // TODO: change pacman start position to be inside box
     start_pos.x += (board.columns() / 2 * Box::size - Box::size / 2);
     start_pos.y += (board.rows() * Box::size - 8 * Box::size);
+
     Pacman pacman(game.get_points_ref(), start_pos.x, start_pos.y);
 
     start_pos = board.getPos();

@@ -6,9 +6,6 @@ class Ghost;
 class Board;
 class Entity;
 
-// FIXME: remove that header
-#include <stdio.h>
-
 // Strategy pattern to do different behaviors that can change in run-time
 class Behavior {
   public:

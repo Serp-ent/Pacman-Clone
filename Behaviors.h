@@ -2,6 +2,7 @@
 #define PACMAN_BEHAVIORS_H
 
 class Pacman;
+class Ghost;
 class Board;
 class Entity;
 
@@ -42,6 +43,18 @@ class RedGhostBehavior : public Behavior {
     virtual void move(Board &b, Entity &e) override {
         // chase pacman // MOSG aggressive
     }
+};
+
+// INFO: testing purpose only
+// moves in random direction
+class DumpGhostBehavior : public Behavior {
+  public:
+    DumpGhostBehavior(Ghost &g) : ghost(g) {}
+
+    virtual void move(Board &b, Entity &e) override;
+
+  private:
+    Ghost &ghost;
 };
 
 // INFO: all ghost behave the same when running away from pacman

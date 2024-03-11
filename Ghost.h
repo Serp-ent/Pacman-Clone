@@ -1,6 +1,7 @@
 #ifndef PACMAN_GHOST_H
 #define PACMAN_GHOST_H
 
+#include "Behaviors.h"
 #include "Entity.h"
 #include <SDL2/SDL.h>
 
@@ -23,20 +24,19 @@ class Ghost : public Entity {
     Ghost() {
         currRect = &spriteClips[directionSprite];
         attacker = true;
+        behavior.reset(new DumpGhostBehavior(*this));
     }
     Ghost(int x, int y) : Ghost{} {
         texture.x = x;
         texture.y = y;
-        // TODO: remove if not needed (don't believe ghost{} to invoke default
-        // ctor)
-        currRect = &spriteClips[directionSprite];
-        attacker = true;
     }
 
     virtual void move(Board &b, Entity &e) override;
     virtual void render() override;
 
   private:
+    friend class DumpGhostBehavior;
+
     // TODO: add sprite
     int directionSprite = 0;
 };

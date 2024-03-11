@@ -83,3 +83,89 @@ void PacmanDefaultBehavior::move(Board &b, Entity &ghost) {
         // TODO: emmit sound for eating ball point
     }
 }
+
+void DumpGhostBehavior::move(Board &b, Entity &pacman) {
+    // TODO: non-random decisions
+    static int moveNumber = 0;
+    if (moveNumber == 40) {
+        int direction = random();
+        // TODO: velocity
+        // TODO: get rid of magic constants
+        ghost.velocity_y = 0;
+        ghost.velocity_x = 0;
+        switch (direction % 4) {
+        case 0:
+            ghost.directionSprite = 0;
+            ghost.velocity_x += 2;
+            break;
+        case 1:
+            ghost.directionSprite = 2;
+            ghost.velocity_x -= 2;
+            break;
+        case 2:
+            ghost.directionSprite = 4;
+            ghost.velocity_y -= 2;
+            break;
+        case 3:
+            ghost.directionSprite = 6;
+            ghost.velocity_y += 2;
+            break;
+        }
+
+        moveNumber = 0;
+    }
+
+    ++moveNumber;
+
+    SDL_Rect border{b.getPos().x, b.getPos().y, b.columns() * Box::size,
+                    b.rows() * Box::size};
+
+    // TODO: fix jumping
+    // TODO: fix moving inside on rectnagle when there is border
+    // e.g. can move up and down when there are upper and lower boxes
+    // // maybe keep surrounding 9 box that surrounds pacman
+    // and check if we can enter them
+    SDL_Point texture_center = {ghost.texture.x + Pacman::width / 2,
+                                ghost.texture.y + Pacman::height / 2};
+
+    // TODO: remove code dupplication here and in pacman class
+    int i = (texture_center.x - b.getPos().x) / Box::size;
+    int j = (texture_center.y - b.getPos().y) / Box::size;
+    if (ghost.velocity_x) {
+        ghost.texture.x += ghost.velocity_x;
+        // fix y position
+        SDL_Point curr_box_center = {
+            b.getPos().x + i * Box::size + Box::size / 2,
+            b.getPos().y + j * Box::size + Box::size / 2};
+        int correct_y = curr_box_center.y - ghost.texture.h / 2;
+        ghost.texture.y = correct_y;
+
+        if ((ghost.texture.x < border.x) ||
+            (ghost.texture.x + ghost.texture.w > border.x + border.w) ||
+            checkCollision(ghost.texture, b, Box::Type::wall)) {
+            ghost.texture.x -= ghost.velocity_x;
+        }
+    } else if (ghost.velocity_y) {
+        ghost.texture.y += ghost.velocity_y;
+
+        // fix x position
+        SDL_Point curr_box_center = {
+            b.getPos().x + i * Box::size + Box::size / 2,
+            b.getPos().y + j * Box::size + Box::size / 2};
+        int correct_x = curr_box_center.x - ghost.texture.w / 2;
+        ghost.texture.x = correct_x;
+
+        if ((ghost.texture.y < border.y) ||
+            (ghost.texture.y + ghost.texture.h) > border.y + border.h ||
+            checkCollision(ghost.texture, b, Box::Type::wall)) {
+            ghost.texture.y -= ghost.velocity_y;
+        }
+    }
+
+    // Make collision only point so textures can overlap
+    SDL_Point collison{ghost.texture.x + ghost.texture.w / 2,
+                       ghost.texture.y + ghost.texture.h / 2};
+    if (SDL_PointInRect(&collison, &pacman.getCollision())) {
+        pacman.clearState(true);
+    }
+}

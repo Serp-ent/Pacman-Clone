@@ -21,6 +21,7 @@ class Pacman {
     static SDL_Rect spriteClips[frames];
     static constexpr int deathFrames = 11;
     static SDL_Rect deathSpriteClips[deathFrames];
+    static SDL_Rect notStartedClip;
 
     Pacman(int &points)
         : points{&points}, texture({0, 0, width, height}), isDead(false),
@@ -43,6 +44,12 @@ class Pacman {
     int getLifesLeft() const { return livesLeft; }
     void setLifesLeft(int lives) { livesLeft = lives; }
 
+    // start means user presses key to start moving pacman
+    void start() { started = true; }
+    // stop means wait for user keypress
+    void stop() { started = false; }
+    bool isStarted() { return started; }
+
   private:
     int *points = nullptr;
     // TODO: add sprite
@@ -53,6 +60,7 @@ class Pacman {
     bool isDead = false;
     bool playsAnimation = false;
     int livesLeft = 3;
+    bool started = false;
 
     int velocity_x;
     int velocity_y;

@@ -9,6 +9,7 @@
 LTexture Pacman::sprite{};
 SDL_Rect Pacman::spriteClips[Pacman::frames];
 SDL_Rect Pacman::deathSpriteClips[Pacman::deathFrames];
+SDL_Rect Pacman::notStartedClip;
 
 void Pacman::move(Board &b) {
     SDL_Rect border{b.getPos().x, b.getPos().y, b.columns() * Box::size,
@@ -103,6 +104,11 @@ void Pacman::render() {
     ++frame;
 
     if (!isDead) {
+        if (!isStarted()) {
+            sprite.render(texture.x, texture.y, Pacman::notStartedClip, texture,
+                          angle_of_ratation);
+            return;
+        }
         if (frame / 5 >= Pacman::frames) {
             frame = 0;
         }

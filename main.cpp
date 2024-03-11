@@ -6,6 +6,7 @@
 #include "TextTexture.h"
 #include "Timer.h"
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_events.h>
 #include <SDL2/SDL_ttf.h>
 #include <cstdio>
 #include <sstream>
@@ -22,7 +23,7 @@
 // TODO: create level designer in SDL2 that creates textfile with map
 // TODO: use SDL functions with unique_ptr
 
-int totalPoints = 100;
+int totalPoints = 0;
 
 // TODO: inherit from Enitty object
 // create GHOST enemy
@@ -35,7 +36,7 @@ int main() {
 
     SDL_Point start_pos = board.getPos();
     // TODO: change pacman start position to be inside box
-    start_pos.x += (board.columns() / 2 * Box::size);
+    start_pos.x += (board.columns() / 2 * Box::size - Box::size / 2);
     start_pos.y += (board.rows() * Box::size - 8 * Box::size);
     Pacman pacman(game.get_points_ref(), start_pos.x, start_pos.y);
 
@@ -61,12 +62,22 @@ int main() {
         while (SDL_PollEvent(&e)) {
             if (e.type == SDL_QUIT) {
                 quit = true;
+            } else if (e.type == SDL_KEYDOWN) {
+                switch (e.key.keysym.sym) {
+                case SDLK_UP:
+                case SDLK_DOWN:
+                case SDLK_RIGHT:
+                case SDLK_LEFT:
+                    pacman.start();
+                    break;
+                }
             }
 
             if (!pacman.playsDeathAnimation()) {
                 pacman.handleEvent(e);
             }
         }
+
         if (game.isEnd()) {
             SDL_SetRenderDrawColor(Game::gRenderer, 0, 0, 0, 0xFF);
             SDL_RenderClear(Game::gRenderer);
@@ -102,6 +113,10 @@ int main() {
         SDL_RenderPresent(Game::gRenderer);
         ++frames;
 
+        if (!pacman.isStarted()) {
+            continue;
+        }
+
         if (pacman.wasKilled()) {
             if (pacman.playsDeathAnimation()) {
                 continue;
@@ -118,7 +133,7 @@ int main() {
             int lives = pacman.getLifesLeft();
             // HACK: reset pacman and ghost position
             start_pos = board.getPos();
-            start_pos.x += (board.columns() / 2 * Box::size);
+            start_pos.x += (board.columns() / 2 * Box::size - Box::size / 2);
             start_pos.y += (board.rows() * Box::size - 8 * Box::size);
             pacman = Pacman(game.get_points_ref(), start_pos.x, start_pos.y);
             pacman.setLifesLeft(lives);
@@ -127,6 +142,8 @@ int main() {
             start_pos.x += (board.columns() / 2 * Box::size);
             start_pos.y += (13 * Box::size);
             ghost = Ghost(start_pos.x, start_pos.y);
+
+            pacman.stop();
         } else if (game.get_points() == board.getTotalPoints()) {
             game.setEnd();
         } else {

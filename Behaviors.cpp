@@ -25,7 +25,6 @@ void PacmanDefaultBehavior::move(Board &b, Entity &ghost) {
 
     if (pacman.attackerTime.getTicks() > 5'000) {
         pacman.attackerTime.stop();
-        std::printf("Pacman is now chased\n");
         ghost.setAttack();
     }
 
@@ -74,9 +73,10 @@ void PacmanDefaultBehavior::move(Board &b, Entity &ghost) {
 
     box = pointIsReached(pacman.texture, b, Box::Type::super_point);
     if (box != nullptr) {
-        std::printf("Super point reached\n");
         ghost.setAttack(false);
         pacman.attackerTime.start();
+        pacman.setAttack(true);
+
         ++(*pacman.points);
         box->setType(Box::Type::empty);
 
@@ -84,7 +84,95 @@ void PacmanDefaultBehavior::move(Board &b, Entity &ghost) {
     }
 }
 
-void DumpGhostBehavior::move(Board &b, Entity &pacman) {
+void PacmanSuperPointBehavior::move(Board &b, Entity &ghost) {
+    // TODO: maybe check that entiy != pacman to prevent killing itself
+
+    // TODO:
+    // another way is to do dynamic_cast and exit with error that given
+    // argument was wrong type (bad - no compile time error checking)
+
+    SDL_Rect border{b.getPos().x, b.getPos().y, b.columns() * Box::size,
+                    b.rows() * Box::size};
+
+    // TODO: fix jumping
+    // TODO: fix moving inside on rectnagle when there is border
+    // e.g. pacman can move up and down when there are upper and lower boxes
+    // // maybe keep surrounding 9 box that surrounds pacman
+    // and check if we can enter them
+    SDL_Point texture_center = {pacman.texture.x + Pacman::width / 2,
+                                pacman.texture.y + Pacman::height / 2};
+
+    if (pacman.attackerTime.getTicks() > 50'000) {
+        pacman.attackerTime.stop();
+        ghost.setAttack();
+        pacman.setAttack(false);
+    }
+
+    int i = (texture_center.x - b.getPos().x) / Box::size;
+    int j = (texture_center.y - b.getPos().y) / Box::size;
+    if (pacman.velocity_x) {
+        pacman.texture.x += pacman.velocity_x;
+        // fix y position
+        SDL_Point curr_box_center = {
+            b.getPos().x + i * Box::size + Box::size / 2,
+            b.getPos().y + j * Box::size + Box::size / 2};
+        int correct_y = curr_box_center.y - pacman.texture.h / 2;
+        pacman.texture.y = correct_y;
+
+        if ((pacman.texture.x < border.x) ||
+            (pacman.texture.x + pacman.texture.w > border.x + border.w) ||
+            checkCollision(pacman.texture, b, Box::Type::wall)) {
+            pacman.texture.x -= pacman.velocity_x;
+        }
+    } else if (pacman.velocity_y) {
+        pacman.texture.y += pacman.velocity_y;
+
+        // fix x position
+        SDL_Point curr_box_center = {
+            b.getPos().x + i * Box::size + Box::size / 2,
+            b.getPos().y + j * Box::size + Box::size / 2};
+        int correct_x = curr_box_center.x - pacman.texture.w / 2;
+        pacman.texture.x = correct_x;
+
+        if ((pacman.texture.y < border.y) ||
+            (pacman.texture.y + pacman.texture.h) > border.y + border.h ||
+            checkCollision(pacman.texture, b, Box::Type::wall)) {
+            pacman.texture.y -= pacman.velocity_y;
+        }
+    }
+    // Make collision only point so textures can overlap
+    SDL_Rect ghostCollision = ghost.getCollision(); // top left corner
+    SDL_Point collison{ghostCollision.x + ghostCollision.w / 2,
+                       ghostCollision.y + ghostCollision.h / 2};
+    if (SDL_PointInRect(&collison, &pacman.getCollision())) {
+        ghost.clearState(true);
+    }
+
+    Box *box = pointIsReached(pacman.texture, b, Box::Type::point);
+    if (box != nullptr) {
+        ++*pacman.points;
+        // change pacman move behavior for 5seconds (now he is attacker)
+        // change ghost move behavior for 5seconds (now they are running away)
+        // TODO: emmit sound for eating ball point
+        box->setType(Box::Type::empty);
+        return;
+    }
+
+    box = pointIsReached(pacman.texture, b, Box::Type::super_point);
+    if (box != nullptr) {
+        // TODO: create some function as switchRoles()
+        ghost.setAttack(false);
+        pacman.attackerTime.start();
+        pacman.setAttack();
+
+        ++(*pacman.points);
+        box->setType(Box::Type::empty);
+
+        // TODO: emmit sound for eating ball point
+    }
+}
+
+void DumbGhostBehavior::move(Board &b, Entity &pacman) {
     // TODO: non-random decisions
     static int moveNumber = 0;
     if (moveNumber == 40) {
@@ -168,4 +256,12 @@ void DumpGhostBehavior::move(Board &b, Entity &pacman) {
     if (SDL_PointInRect(&collison, &pacman.getCollision())) {
         pacman.clearState(true);
     }
+}
+
+// TODO: return to the base as dot
+void GhostDeathBehavior::move(Board &b, Entity &e) {
+    SDL_Point new_pos{50, 200};
+    ghost.setPos(new_pos);
+    // TODO:
+    // when return to base switch behavior
 }

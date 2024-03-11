@@ -24,7 +24,7 @@ class Ghost : public Entity {
     Ghost() {
         currRect = &spriteClips[directionSprite];
         attacker = true;
-        behavior.reset(new DumpGhostBehavior(*this));
+        behavior.reset(new DumbGhostBehavior(*this));
     }
     Ghost(int x, int y) : Ghost{} {
         texture.x = x;
@@ -34,8 +34,11 @@ class Ghost : public Entity {
     virtual void move(Board &b, Entity &e) override;
     virtual void render() override;
 
+    virtual void clearState(bool death = false) override;
+    virtual void setAttack(bool attack = true) override;
+
   private:
-    friend class DumpGhostBehavior;
+    friend class DumbGhostBehavior;
 
     // TODO: add sprite
     int directionSprite = 0;

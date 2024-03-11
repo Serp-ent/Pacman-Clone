@@ -1,10 +1,8 @@
 #include "Pacman.h"
 
+#include "Behaviors.h"
 #include "Board.h"
-#include "Ghost.h"
-#include "utils.h"
 
-#include "Game.h"
 #include <SDL2/SDL_rect.h>
 #include <SDL2/SDL_render.h>
 #include <cstdio>
@@ -15,7 +13,15 @@ SDL_Rect Pacman::deathSpriteClips[Pacman::deathFrames];
 SDL_Rect Pacman::notStartedClip;
 
 // TODO: behavior-> move should take entity as parameter
-void Pacman::move(Board &b, Entity &ghost) { behavior->move(b, ghost); }
+void Pacman::move(Board &b, Entity &ghost) {
+    behavior->move(b, ghost);
+    // TODO: some cast to prevent many memory allocations
+    if (attacker) {
+        behavior.reset(new PacmanSuperPointBehavior{*this});
+    } else {
+        behavior.reset(new PacmanDefaultBehavior{*this});
+    }
+}
 
 void Pacman::render() {
     static int frame = 0;

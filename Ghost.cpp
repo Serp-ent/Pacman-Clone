@@ -1,16 +1,14 @@
 #include "Ghost.h"
 
+#include "Behaviors.h"
 #include "Board.h"
-#include "Game.h"
-#include "utils.h"
 #include <SDL2/SDL_render.h>
+#include <cstdio>
 
 SDL_Rect Ghost::spriteClips[Ghost::frames];
 SDL_Rect Ghost::runningAwayClips[Ghost::runningAwayFrames];
 
-void Ghost::move(Board &b, Entity &pacman) {
-    behavior->move(b, pacman);
-}
+void Ghost::move(Board &b, Entity &pacman) { behavior->move(b, pacman); }
 void Ghost::render() {
     // // more rendering
     // SDL_SetRenderDrawColor(Game::gRenderer, 0xFF, 0, 0, 0xAA);
@@ -39,4 +37,40 @@ void Ghost::render() {
     }
 
     Pacman::sprite.render(texture.x, texture.y, *currRect, texture);
+}
+
+void Ghost::setAttack(bool attack) {
+    Entity::setAttack(attack);
+
+    // cast to prevent many memory allocations
+    // TODO: find better way
+    if (attacker) {
+        DumbGhostBehavior *b =
+            dynamic_cast<DumbGhostBehavior *>(behavior.get());
+        if (!b) {
+            behavior.reset(new DumbGhostBehavior{*this});
+        }
+    } else {
+        GhostRunAwayBehavior *b =
+            dynamic_cast<GhostRunAwayBehavior *>(behavior.get());
+        if (!b) {
+            behavior.reset(new GhostRunAwayBehavior{});
+        }
+    }
+}
+
+void Ghost::clearState(bool death) {
+    Entity::clearState(death);
+    if (isDead) {
+        GhostDeathBehavior *b =
+            dynamic_cast<GhostDeathBehavior *>(behavior.get());
+        if (!b) {
+            behavior.reset(new GhostDeathBehavior{*this});
+        }
+    } else {
+        RedGhostBehavior *b = dynamic_cast<RedGhostBehavior *>(behavior.get());
+        if (!b) {
+            behavior.reset(new RedGhostBehavior{});
+        }
+    }
 }

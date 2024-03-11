@@ -6,6 +6,9 @@ class Ghost;
 class Board;
 class Entity;
 
+// FIXME: remove that header
+#include <stdio.h>
+
 // Strategy pattern to do different behaviors that can change in run-time
 class Behavior {
   public:
@@ -27,10 +30,7 @@ class PacmanDefaultBehavior : public Behavior {
 class PacmanSuperPointBehavior : public Behavior {
   public:
     PacmanSuperPointBehavior(Pacman &p) : pacman(p) {}
-    virtual void move(Board &b, Entity &e) override {
-        // eat points
-        // if ghost encoutered eat him and add multiple points
-    }
+    virtual void move(Board &b, Entity &e) override;
 
   private:
     Pacman &pacman;
@@ -47,9 +47,9 @@ class RedGhostBehavior : public Behavior {
 
 // INFO: testing purpose only
 // moves in random direction
-class DumpGhostBehavior : public Behavior {
+class DumbGhostBehavior : public Behavior {
   public:
-    DumpGhostBehavior(Ghost &g) : ghost(g) {}
+    DumbGhostBehavior(Ghost &g) : ghost(g) {}
 
     virtual void move(Board &b, Entity &e) override;
 
@@ -69,9 +69,12 @@ class GhostRunAwayBehavior : public Behavior {
 // TODO:
 class GhostDeathBehavior : public Behavior {
   public:
-    virtual void move(Board &b, Entity &e) override {
-        // move to ghost spawn
-    }
+    GhostDeathBehavior(Ghost &g) : ghost{g} {}
+
+    virtual void move(Board &b, Entity &e) override ;
+
+  private:
+    Ghost &ghost;
 };
 
 #endif // !PACMAN_BEHAVIORS_H

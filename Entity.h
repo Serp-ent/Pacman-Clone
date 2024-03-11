@@ -30,9 +30,10 @@ class Entity {
     }
 
     bool wasKilled() const { return isDead; }
-    void clearState(bool death = false) { isDead = death; }
+    virtual void clearState(bool death = false) { isDead = death; }
 
-    void setAttack(bool attack = true) { attacker = attack; }
+    virtual void setAttack(bool attack = true) { attacker = attack; }
+
     bool getAttack() const { return attacker; }
 
   protected:

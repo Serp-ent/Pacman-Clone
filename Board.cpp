@@ -37,6 +37,17 @@ Board::Board(const std::string &filename) {
     border.h = rows() * Box::size;
     border.w = columns() * Box::size;
 
+    // double because it is relative to box position instead of pixels
+    double pacmanStart_x, pacmanStart_y;
+    is >> pacmanStart_x >> pacmanStart_y;
+    pacman_start.x = border.x + Box::size * (pacmanStart_x - 1);
+    pacman_start.y = border.y + Box::size * (pacmanStart_y - 1);
+
+    double ghostStart_x, ghostStart_y;
+    is >> ghostStart_x >> ghostStart_y;
+    ghost_start.x = border.x + Box::size * (ghostStart_x - 1);
+    ghost_start.y = border.y + Box::size * (ghostStart_y - 1);
+
     char type;
     for (int i = 0; i < rows(); ++i) {
         for (int j = 0; j < columns(); ++j) {

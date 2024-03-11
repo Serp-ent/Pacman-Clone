@@ -24,7 +24,7 @@ class Entity {
         SDL_Point p{texture.x, texture.y};
         return p;
     }
-    void setPos(SDL_Point &p) {
+    void setPos(const SDL_Point &p) {
         texture.x = p.x;
         texture.y = p.y;
     }

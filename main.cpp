@@ -32,17 +32,10 @@ int main() {
     SDL_Event e;
     Board board("./level1.txt");
 
-    SDL_Point start_pos = board.getPos();
-    // TODO: change pacman start position to be inside box
-    start_pos.x += (board.columns() / 2 * Box::size - Box::size / 2);
-    start_pos.y += (board.rows() * Box::size - 8 * Box::size);
+    Pacman pacman(game.get_points_ref(), board.getPacmanStart().x,
+                  board.getPacmanStart().y);
 
-    Pacman pacman(game.get_points_ref(), start_pos.x, start_pos.y);
-
-    start_pos = board.getPos();
-    start_pos.x += (board.columns() / 2 * Box::size);
-    start_pos.y += (13 * Box::size);
-    Ghost ghost(start_pos.x, start_pos.y);
+    Ghost ghost(board.getGhostStart().x, board.getGhostStart().y);
 
     // TODO: create HUD class
     SDL_Color black{0xFF, 0xFF, 0xFF, 0xFF};
@@ -131,17 +124,10 @@ int main() {
             // and ghost start position is)
             int lives = pacman.getLifesLeft();
             // HACK: reset pacman and ghost position
-            start_pos = board.getPos();
-            start_pos.x += (board.columns() / 2 * Box::size - Box::size / 2);
-            start_pos.y += (board.rows() * Box::size - 8 * Box::size);
-
-            pacman.setPos(start_pos);
+            pacman.setPos(board.getPacmanStart());
             pacman.setLifesLeft(lives);
 
-            start_pos = board.getPos();
-            start_pos.x += (board.columns() / 2 * Box::size);
-            start_pos.y += (13 * Box::size);
-            ghost.setPos(start_pos);
+            ghost.setPos(board.getGhostStart());
 
             pacman.stop();
         } else if (game.get_points() == board.getTotalPoints()) {

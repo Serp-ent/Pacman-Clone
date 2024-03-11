@@ -5,6 +5,7 @@
 #include "Game.h"
 #include "LTexture.h"
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_rect.h>
 #include <string>
 #include <vector>
 
@@ -37,10 +38,16 @@ class Board {
 
     int getTotalPoints() const { return totalPoints; }
 
+    const SDL_Point &getPacmanStart() const { return pacman_start; }
+    const SDL_Point &getGhostStart() const { return ghost_start; }
+
   private:
     int rows_;
     int columns_;
     int totalPoints = 0;
+
+    SDL_Point pacman_start;
+    SDL_Point ghost_start;
 
     SDL_Rect border;
 

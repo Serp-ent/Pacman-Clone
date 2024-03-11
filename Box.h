@@ -1,7 +1,9 @@
 #ifndef PACMAN_BOX_H
 #define PACMAN_BOX_H
 
+#include "Ghost.h"
 #include "Pacman.h"
+#include <SDL2/SDL_rect.h>
 
 class Box {
   public:
@@ -12,7 +14,10 @@ class Box {
     void setType(Box::Type t) { type_ = t; };
     Type getType() const { return type_; }
 
+    void setClip(SDL_Rect *clip) { currClip = clip; }
+
   private:
+    SDL_Rect *currClip = nullptr;
     Type type_;
 };
 

@@ -5,6 +5,9 @@
 
 using namespace std;
 
+SDL_Rect Board::mapClips[Board::clipsNumber];
+LTexture Board::mapTexture;
+
 void Board::render() {
     SDL_Point box{border.x, border.y};
     for (int i = 0; i < rows(); ++i) {
@@ -41,6 +44,10 @@ Board::Board(const std::string &filename) {
             switch (type) {
             case '#':
                 getBox(i, j).setType(Box::Type::wall);
+                // NOTE: for now disable map
+                // TODO: algorithm that picks appriopriate clip
+                // depending on neightbours
+                // getBox(i, j).setClip(&Board::mapClips[0]);
                 break;
             case '.':
                 ++totalPoints;

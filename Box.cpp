@@ -2,11 +2,19 @@
 #include "Game.h"
 #include "SDL2/SDL.h"
 
+#include "Board.h"
+#include <SDL2/SDL_render.h>
+
 void Box::render(int x, int y) {
     SDL_Rect r{x, y, size, size};
 
     SDL_SetRenderDrawColor(Game::gRenderer, 0, 0, 0, 0xFF);
     SDL_RenderFillRect(Game::gRenderer, &r);
+    if (currClip) {
+        Board::mapTexture.render(x, y, *currClip, r);
+
+        return; // draw current texture and return
+    }
 
     switch (type_) {
     case Type::super_point:

@@ -3,6 +3,7 @@
 
 #include "Box.h"
 #include "Game.h"
+#include "LTexture.h"
 #include <SDL2/SDL.h>
 #include <string>
 #include <vector>
@@ -10,6 +11,10 @@
 // TODO: change name to Level
 class Board {
   public:
+    static LTexture mapTexture;
+    static constexpr int clipsNumber = 44;
+    static SDL_Rect mapClips[clipsNumber];
+
     Board(int h, int w)
         : rows_(h), columns_(w),
           border{Game::screen_width / 2 - (rows() * Box::size) / 2,

@@ -1,5 +1,6 @@
 #include "Game.h"
 
+#include "Board.h"
 #include "Ghost.h"
 #include "SDL2/SDL_image.h"
 
@@ -58,8 +59,10 @@ void Game::load_media() {
         throw std::runtime_error{"Failed to load font"};
     }
 
+    //***************************************************
+
     if (!Pacman::sprite.loadFromFile("./pacman_sprite.png")) {
-        std::printf("Failed to pacman sprite! SDL_ttf Error: %s\n",
+        std::printf("Failed to load pacman sprite! SDL_ttf Error: %s\n",
                     IMG_GetError());
         throw std::runtime_error{"Failed to load pacman sprite"};
     }
@@ -88,6 +91,29 @@ void Game::load_media() {
         Ghost::runningAwayClips[i] = {pos.x, pos.y, 16, 16};
         pos.x += 16;
     }
+
+    //***************************************************
+
+    if (!Board::mapTexture.loadFromFile("./map_sprite.png")) {
+        std::printf("Failed to load map sprite! SDL_ttf Error: %s\n",
+                    IMG_GetError());
+        throw std::runtime_error{"Failed to load map sprite"};
+    }
+
+    pos = {0, 0};
+    pos.y += 3 * (8 + 1); // read third sprite set
+    for (int i = 0; i < Board::clipsNumber; ++i) {
+        Board::mapClips[i] = {pos.x, pos.y, 8, 8};
+
+        pos.x += 1 + 8;
+        if ((i + 1) % 16 == 0) {
+            pos.x = 0;
+            pos.y = 1 + 8; // 1 means margin between textures
+                           // 8 because textures are size 8px by 8px
+        }
+    }
+
+    //***************************************************
 }
 
 void Game::close_game() {

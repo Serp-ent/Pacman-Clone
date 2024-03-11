@@ -20,25 +20,25 @@ class Ghost : public Entity {
     static constexpr int runningAwayFrames = 2;
     static SDL_Rect runningAwayClips[runningAwayFrames];
 
-    Ghost() { currRect = &spriteClips[directionSprite]; }
+    Ghost() {
+        currRect = &spriteClips[directionSprite];
+        attacker = true;
+    }
     Ghost(int x, int y) : Ghost{} {
         texture.x = x;
         texture.y = y;
         // TODO: remove if not needed (don't believe ghost{} to invoke default
         // ctor)
         currRect = &spriteClips[directionSprite];
+        attacker = true;
     }
 
     virtual void move(Board &b, Entity &e) override;
     virtual void render() override;
 
-    void setAttack(bool attack = true) { attacker = attack; }
-    bool getAttack() const { return attacker; }
-
   private:
     // TODO: add sprite
     int directionSprite = 0;
-    int attacker = true;
 };
 
 #endif // !PACMAN_GHOST_H

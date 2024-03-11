@@ -15,7 +15,7 @@ SDL_Rect Pacman::deathSpriteClips[Pacman::deathFrames];
 SDL_Rect Pacman::notStartedClip;
 
 // TODO: behavior-> move should take entity as parameter
-void Pacman::move(Board &b, Entity &e) { behavior->move(b); }
+void Pacman::move(Board &b, Entity &ghost) { behavior->move(b, ghost); }
 
 void Pacman::render() {
     static int frame = 0;
@@ -25,8 +25,6 @@ void Pacman::render() {
     // instead of magic number;
 
     ++frame;
-
-    std::printf("Pacman::render pos (%d, %d)\n", texture.x, texture.y);
 
     if (!isDead) {
         if (!isStarted()) {

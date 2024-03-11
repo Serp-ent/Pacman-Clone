@@ -32,6 +32,7 @@ class Pacman : public Entity {
     Pacman(int &points) : points{&points} {
         currRect = &notStartedClip;
         behavior.reset(new PacmanDefaultBehavior{*this});
+        attacker = false;
     }
     Pacman(int &points, int x, int y) : Pacman{points} {
         texture.x = x;

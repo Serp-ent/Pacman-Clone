@@ -23,7 +23,10 @@ class Entity {
     bool wasKilled() const { return isDead; }
     void clearState(bool death = false) { isDead = death; }
 
-  public:
+    void setAttack(bool attack = true) { attacker = attack; }
+    bool getAttack() const { return attacker; }
+
+  protected:
     SDL_Rect texture{0, 0, width, height};
     SDL_Rect *currRect = nullptr;
     std::unique_ptr<Behavior> behavior;
@@ -32,6 +35,8 @@ class Entity {
 
     int velocity_x = 0;
     int velocity_y = 0;
+
+    int attacker;
 };
 
 #endif // !PACMAN_ENTITY_H

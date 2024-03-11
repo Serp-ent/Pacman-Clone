@@ -5,7 +5,13 @@
 #include "utils.h"
 #include <cstdio>
 
-void PacmanDefaultBehavior::move(Board &b) {
+void PacmanDefaultBehavior::move(Board &b, Entity &ghost) {
+    // TODO: maybe check that entiy != pacman to prevent killing itself
+
+    // TODO:
+    // another way is to do dynamic_cast and exit with error that given
+    // argument was wrong type (bad - no compile time error checking)
+
     SDL_Rect border{b.getPos().x, b.getPos().y, b.columns() * Box::size,
                     b.rows() * Box::size};
 
@@ -20,8 +26,7 @@ void PacmanDefaultBehavior::move(Board &b) {
     if (pacman.attackerTime.getTicks() > 5'000) {
         pacman.attackerTime.stop();
         std::printf("Pacman is now chased\n");
-        // FIXME:
-        // ghost.setAttack();
+        ghost.setAttack();
     }
 
     int i = (texture_center.x - b.getPos().x) / Box::size;
@@ -70,11 +75,11 @@ void PacmanDefaultBehavior::move(Board &b) {
     box = pointIsReached(pacman.texture, b, Box::Type::super_point);
     if (box != nullptr) {
         std::printf("Super point reached\n");
-        // TODO:
-        // ghost.setAttack(false);
+        ghost.setAttack(false);
         pacman.attackerTime.start();
         ++(*pacman.points);
-        // TODO: emmit sound for eating ball point
         box->setType(Box::Type::empty);
+
+        // TODO: emmit sound for eating ball point
     }
 }

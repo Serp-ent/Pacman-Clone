@@ -3,11 +3,12 @@
 
 class Pacman;
 class Board;
+class Entity;
 
 // Strategy pattern to do different behaviors that can change in run-time
 class Behavior {
   public:
-    virtual void move(Board &b) = 0;
+    virtual void move(Board &b, Entity &e) = 0;
 
     virtual ~Behavior() {}
 };
@@ -16,7 +17,7 @@ class PacmanDefaultBehavior : public Behavior {
   public:
     PacmanDefaultBehavior(Pacman &p) : pacman(p) {}
 
-    virtual void move(Board &b) override;
+    virtual void move(Board &b, Entity &e) override;
 
   private:
     Pacman &pacman;
@@ -25,7 +26,7 @@ class PacmanDefaultBehavior : public Behavior {
 class PacmanSuperPointBehavior : public Behavior {
   public:
     PacmanSuperPointBehavior(Pacman &p) : pacman(p) {}
-    virtual void move(Board &b) override {
+    virtual void move(Board &b, Entity &e) override {
         // eat points
         // if ghost encoutered eat him and add multiple points
     }
@@ -38,7 +39,7 @@ class PacmanSuperPointBehavior : public Behavior {
 // TODO:
 class RedGhostBehavior : public Behavior {
   public:
-    virtual void move(Board &b) override {
+    virtual void move(Board &b, Entity &e) override {
         // chase pacman // MOSG aggressive
     }
 };
@@ -47,7 +48,7 @@ class RedGhostBehavior : public Behavior {
 // TODO:
 class GhostRunAwayBehavior : public Behavior {
   public:
-    virtual void move(Board &b) override {
+    virtual void move(Board &b, Entity &e) override {
         // run away from pacman
     }
 };
@@ -55,7 +56,7 @@ class GhostRunAwayBehavior : public Behavior {
 // TODO:
 class GhostDeathBehavior : public Behavior {
   public:
-    virtual void move(Board &b) override {
+    virtual void move(Board &b, Entity &e) override {
         // move to ghost spawn
     }
 };

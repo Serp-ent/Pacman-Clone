@@ -102,7 +102,7 @@ void PacmanSuperPointBehavior::move(Board &b, Entity &ghost) {
     SDL_Point texture_center = {pacman.texture.x + Pacman::width / 2,
                                 pacman.texture.y + Pacman::height / 2};
 
-    if (pacman.attackerTime.getTicks() > 50'000) {
+    if (pacman.attackerTime.getTicks() > 5'000) {
         pacman.attackerTime.stop();
         ghost.setAttack();
         pacman.setAttack(false);
@@ -260,7 +260,7 @@ void DumbGhostBehavior::move(Board &b, Entity &pacman) {
 
 // TODO: return to the base as dot
 void GhostDeathBehavior::move(Board &b, Entity &e) {
-    SDL_Point new_pos{50, 200};
+    SDL_Point new_pos{b.getGhostStart().x, b.getGhostStart().y};
     ghost.setPos(new_pos);
     // TODO:
     // when return to base switch behavior

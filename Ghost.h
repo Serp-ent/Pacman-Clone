@@ -34,6 +34,14 @@ class Ghost : public Entity {
     virtual void move(Board &b, Entity &e) override;
     virtual void render() override;
 
+    void die(Board &b) {
+        GhostDeathBehavior *newBehavior = new GhostDeathBehavior{*this};
+        newBehavior->loadPathToHome(b);
+
+        behavior.reset(newBehavior);
+
+        Entity::clearState(true);
+    }
     virtual void clearState(bool death = false) override;
     virtual void setAttack(bool attack = true) override;
 

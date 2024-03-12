@@ -1,6 +1,8 @@
 #ifndef PACMAN_BEHAVIORS_H
 #define PACMAN_BEHAVIORS_H
 
+#include "Graph.h"
+
 class Pacman;
 class Ghost;
 class Board;
@@ -66,12 +68,15 @@ class GhostRunAwayBehavior : public Behavior {
 // TODO:
 class GhostDeathBehavior : public Behavior {
   public:
-    GhostDeathBehavior(Ghost &g) : ghost{g} {}
+    GhostDeathBehavior(Ghost& g): ghost{g} {};
 
-    virtual void move(Board &b, Entity &e) override ;
+    void loadPathToHome(Board& b);
+
+    virtual void move(Board &b, Entity &e) override;
 
   private:
     Ghost &ghost;
+    std::vector<Graph::BoxNode *> path;
 };
 
 #endif // !PACMAN_BEHAVIORS_H

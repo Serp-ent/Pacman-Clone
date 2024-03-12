@@ -145,7 +145,9 @@ void PacmanSuperPointBehavior::move(Board &b, Entity &ghost) {
     SDL_Point collison{ghostCollision.x + ghostCollision.w / 2,
                        ghostCollision.y + ghostCollision.h / 2};
     if (SDL_PointInRect(&collison, &pacman.getCollision())) {
-        ghost.clearState(true);
+        Ghost *g = dynamic_cast<Ghost *>(&ghost);
+        g->die(b);
+        // ghost.clearState(true);
     }
 
     Box *box = pointIsReached(pacman.texture, b, Box::Type::point);
@@ -258,10 +260,60 @@ void DumbGhostBehavior::move(Board &b, Entity &pacman) {
     }
 }
 
+/*
+    struct BoxPos {
+        int x;
+        int y;
+    };
+
+    // TODO: there should be function to take box position of entity
+    BoxPos pacmanPos = {
+        (pacman.getPos().x - b.getPos().x) / Box::size,
+        (pacman.getPos().y - b.getPos().y) / Box::size,
+    };
+    BoxPos ghostPos = {
+        (ghost.getPos().x - b.getPos().x) / Box::size,
+        (ghost.getPos().y - b.getPos().y) / Box::size,
+    };
+
+    std::vector<Graph::BoxNode *> path = breadthFirstSearch(
+        b.graph, ghostPos.x, ghostPos.y, pacmanPos.x, pacmanPos.y);
+    printf("\n");
+    for (const Graph::BoxNode *box : path) {
+        printf(" -> (%d, %d)", box->x, box->y);
+    }
+    printf("\n");
+
+*/
+
+void GhostDeathBehavior::loadPathToHome(Board &b) {
+
+    struct BoxPos {
+        int x, y;
+    };
+
+    BoxPos ghostPos = {
+        (ghost.getPos().x - b.getPos().x) / Box::size,
+        (ghost.getPos().y - b.getPos().y) / Box::size,
+    };
+    BoxPos basePos = {
+        (b.getGhostStart().x - b.getPos().x) / Box::size,
+        (b.getGhostStart().y - b.getPos().y) / Box::size,
+    };
+
+    path = breadthFirstSearch(b.graph, ghostPos.x, ghostPos.y, basePos.x,
+                              basePos.y);
+}
+
 // TODO: return to the base as dot
 void GhostDeathBehavior::move(Board &b, Entity &e) {
-    SDL_Point new_pos{b.getGhostStart().x, b.getGhostStart().y};
-    ghost.setPos(new_pos);
+    // TODO: Traverse home using path
+    printf("\nghost die\n");
+    for (auto &p : path) {
+        printf(" -> (%d, %d)", p->x, p->y);
+    }
+    printf("\n");
+    ghost.setPos(b.getGhostStart());
     // TODO:
     // when return to base switch behavior
 }

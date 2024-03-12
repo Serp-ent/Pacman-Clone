@@ -1,7 +1,9 @@
 #include "Board.h"
 #include "Game.h"
 #include <fstream>
+#include <queue>
 #include <stdexcept>
+#include <unordered_map>
 
 using namespace std;
 
@@ -74,4 +76,6 @@ Board::Board(const std::string &filename) {
             }
         }
     }
+
+    graph.setBoard(*this);
 }

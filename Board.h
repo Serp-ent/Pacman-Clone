@@ -3,6 +3,7 @@
 
 #include "Box.h"
 #include "Game.h"
+#include "Graph.h"
 #include "LTexture.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_rect.h>
@@ -21,7 +22,9 @@ class Board {
           border{Game::screen_width / 2 - (rows() * Box::size) / 2,
                  Game::screen_height / 2 - (columns() * Box::size) / 2,
                  columns() * Box::size, rows() * Box::size},
-          board_(w * h) {}
+          board_(w * h) {
+        graph.setBoard(*this);
+    }
 
     Board(const std::string &filename);
 
@@ -41,6 +44,8 @@ class Board {
     const SDL_Point &getPacmanStart() const { return pacman_start; }
     const SDL_Point &getGhostStart() const { return ghost_start; }
 
+    // TODO: move to private section
+    Graph graph;
   private:
     int rows_;
     int columns_;
@@ -48,6 +53,7 @@ class Board {
 
     SDL_Point pacman_start;
     SDL_Point ghost_start;
+
 
     SDL_Rect border;
 

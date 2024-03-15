@@ -147,7 +147,8 @@ void PacmanSuperPointBehavior::move(Board &b, Entity &ghost) {
     SDL_Rect ghostCollision = ghost.getCollision(); // top left corner
     SDL_Point collison{ghostCollision.x + ghostCollision.w / 2,
                        ghostCollision.y + ghostCollision.h / 2};
-    if (SDL_PointInRect(&collison, &pacman.getCollision())) {
+    if (!ghost.wasKilled() &&
+        SDL_PointInRect(&collison, &pacman.getCollision())) {
         Ghost *g = dynamic_cast<Ghost *>(&ghost);
         g->die(b);
         // ghost.clearState(true);
@@ -312,7 +313,7 @@ void GhostDeathBehavior::move(Board &b, Entity &e) {
     // TODO: Traverse home using path
     static int frame = 0;
     printf("\n");
-    if (frame == 20) {
+    if (frame == 10) {
         if (path.empty()) {
             printf("already at destination\n");
             printf("Reseting to aggressive pacman behavior\n");

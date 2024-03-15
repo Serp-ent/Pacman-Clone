@@ -20,6 +20,15 @@ void Ghost::render() {
 
     // TODO: frame speed scale
     // instead of magic number;
+    if (wasKilled()) {
+        // TODO: change sprite when returning to base
+        SDL_SetRenderDrawColor(Game::gRenderer, 0xFF, 0xFF, 0xFF, 100);
+        SDL_RenderFillRect(Game::gRenderer, &texture);
+
+        SDL_SetRenderDrawColor(Game::gRenderer, 0, 0, 0, 0xFF);
+        SDL_RenderDrawRect(Game::gRenderer, &texture);
+        return;
+    }
 
     ++frame;
     if (attacker) {

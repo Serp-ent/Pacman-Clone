@@ -35,18 +35,20 @@ class Ghost : public Entity {
     virtual void render() override;
 
     void die(Board &b) {
+        Entity::clearState(true);
+
         GhostDeathBehavior *newBehavior = new GhostDeathBehavior{*this};
         newBehavior->loadPathToHome(b);
 
         behavior.reset(newBehavior);
 
-        Entity::clearState(true);
     }
     virtual void clearState(bool death = false) override;
     virtual void setAttack(bool attack = true) override;
 
   private:
     friend class DumbGhostBehavior;
+    friend class GhostDeathBehavior;
 
     // TODO: add sprite
     int directionSprite = 0;

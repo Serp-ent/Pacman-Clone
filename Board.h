@@ -37,7 +37,7 @@ class Board {
 
     int rows() const { return rows_; }
     int columns() const { return columns_; }
-    Box &getBox(int i, int j) { return board_.at(i * columns() + j); }
+    Box &getBox(int x, int y) { return board_.at(y * columns() + x); }
 
     int getTotalPoints() const { return totalPoints; }
 
@@ -46,6 +46,7 @@ class Board {
 
     // TODO: move to private section
     Graph graph;
+
   private:
     int rows_;
     int columns_;
@@ -53,7 +54,6 @@ class Board {
 
     SDL_Point pacman_start;
     SDL_Point ghost_start;
-
 
     SDL_Rect border;
 

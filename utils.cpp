@@ -45,10 +45,10 @@ bool checkCollision(const SDL_Rect &a, const SDL_Rect &b) {
 Box *checkCollision(SDL_Rect &p, Board &b, Box::Type boxType) {
     // TODO: check only surrounding boxes
     SDL_Rect box{b.getPos().x, b.getPos().y, Box::size, Box::size};
-    for (int i = 0; i < b.rows(); ++i) {
-        for (int j = 0; j < b.columns(); ++j) {
-            if (b.getBox(i, j).getType() == boxType && checkCollision(p, box)) {
-                return &b.getBox(i, j);
+    for (int y = 0; y < b.rows(); ++y) {
+        for (int x = 0; x < b.columns(); ++x) {
+            if (b.getBox(x, y).getType() == boxType && checkCollision(p, box)) {
+                return &b.getBox(x, y);
             }
 
             box.x += Box::size;
@@ -66,13 +66,13 @@ Box *pointIsReached(SDL_Rect &p, Board &b, Box::Type boxType) {
     // TODO: check only surrounding boxes
 
     SDL_Rect box{b.getPos().x, b.getPos().y, Box::size, Box::size};
-    for (int i = 0; i < b.rows(); ++i) {
-        for (int j = 0; j < b.columns(); ++j) {
+    for (int y = 0; y < b.rows(); ++y) {
+        for (int x = 0; x < b.columns(); ++x) {
             SDL_Point box_center{box.x + Box::size / 2, box.y + Box::size / 2};
-            if (b.getBox(i, j).getType() == boxType &&
+            if (b.getBox(x, y).getType() == boxType &&
                 SDL_PointInRect(&box_center, &p)) {
 
-                return &b.getBox(i, j);
+                return &b.getBox(x, y);
             }
 
             box.x += Box::size;

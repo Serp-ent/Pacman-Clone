@@ -68,9 +68,10 @@ void Ghost::clearState(bool death) {
             behavior.reset(new GhostDeathBehavior{*this});
         }
     } else {
-        RedGhostBehavior *b = dynamic_cast<RedGhostBehavior *>(behavior.get());
+        DumbGhostBehavior *b =
+            dynamic_cast<DumbGhostBehavior *>(behavior.get());
         if (!b) {
-            behavior.reset(new RedGhostBehavior{});
+            behavior.reset(new DumbGhostBehavior{*this});
         }
     }
 }

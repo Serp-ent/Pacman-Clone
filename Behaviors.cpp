@@ -1,8 +1,10 @@
 #include "Behaviors.h"
+#include <unistd.h>
 
 #include "Board.h"
 #include "SDL2/SDL.h"
 #include "utils.h"
+#include <SDL2/SDL_rect.h>
 #include <cstdio>
 
 void PacmanDefaultBehavior::move(Board &b, Entity &ghost) {
@@ -25,7 +27,7 @@ void PacmanDefaultBehavior::move(Board &b, Entity &ghost) {
 
     if (pacman.attackerTime.getTicks() > 5'000) {
         pacman.attackerTime.stop();
-        ghost.setAttack();
+        // ghost.setAttack();
     }
 
     int i = (texture_center.x - b.getPos().x) / Box::size;
@@ -104,7 +106,7 @@ void PacmanSuperPointBehavior::move(Board &b, Entity &ghost) {
 
     if (pacman.attackerTime.getTicks() > 5'000) {
         pacman.attackerTime.stop();
-        ghost.setAttack();
+        // ghost.setAttack();
         pacman.setAttack(false);
     }
 
@@ -140,6 +142,7 @@ void PacmanSuperPointBehavior::move(Board &b, Entity &ghost) {
             pacman.texture.y -= pacman.velocity_y;
         }
     }
+
     // Make collision only point so textures can overlap
     SDL_Rect ghostCollision = ghost.getCollision(); // top left corner
     SDL_Point collison{ghostCollision.x + ghostCollision.w / 2,
@@ -287,7 +290,6 @@ void DumbGhostBehavior::move(Board &b, Entity &pacman) {
 */
 
 void GhostDeathBehavior::loadPathToHome(Board &b) {
-
     struct BoxPos {
         int x, y;
     };
@@ -308,12 +310,33 @@ void GhostDeathBehavior::loadPathToHome(Board &b) {
 // TODO: return to the base as dot
 void GhostDeathBehavior::move(Board &b, Entity &e) {
     // TODO: Traverse home using path
-    printf("\nghost die\n");
-    for (auto &p : path) {
-        printf(" -> (%d, %d)", p->x, p->y);
-    }
+    static int frame = 0;
     printf("\n");
-    ghost.setPos(b.getGhostStart());
+    if (frame == 20) {
+        if (path.empty()) {
+            printf("already at destination\n");
+            printf("Reseting to aggressive pacman behavior\n");
+            ghost.clearState();
+            ghost.setAttack();
+            return;
+        }
+        Graph::BoxNode *p = path.back();
+        SDL_Point new_pos{b.getPos().x + p->x * Box::size,
+                          b.getPos().y + p->y * Box::size};
+
+        ghost.setPos(new_pos);
+        frame = 0;
+
+        path.pop_back();
+    }
+    ++frame;
+    auto from = path.rbegin();
+    while (from != path.rend()) {
+        printf(" -> (%d, %d)", (*from)->x, (*from)->y);
+        ++from;
+    }
+    // ghost.setPos(b.getGhostStart());
+
     // TODO:
     // when return to base switch behavior
 }

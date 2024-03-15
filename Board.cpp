@@ -1,5 +1,6 @@
 #include "Board.h"
 #include "Game.h"
+#include <cstdio>
 #include <fstream>
 #include <queue>
 #include <stdexcept>
@@ -12,9 +13,9 @@ LTexture Board::mapTexture;
 
 void Board::render() {
     SDL_Point box{border.x, border.y};
-    for (int i = 0; i < rows(); ++i) {
-        for (int j = 0; j < columns(); ++j) {
-            getBox(i, j).render(box.x, box.y);
+    for (int y = 0; y < rows(); ++y) {
+        for (int x = 0; x < columns(); ++x) {
+            getBox(x, y).render(box.x, box.y);
             box.x += Box::size;
         }
         box.x = border.x;
@@ -51,12 +52,12 @@ Board::Board(const std::string &filename) {
     ghost_start.y = border.y + Box::size * (ghostStart_y - 1);
 
     char type;
-    for (int i = 0; i < rows(); ++i) {
-        for (int j = 0; j < columns(); ++j) {
+    for (int y = 0; y < rows(); ++y) {
+        for (int x = 0; x < columns(); ++x) {
             is >> type;
             switch (type) {
             case '#':
-                getBox(i, j).setType(Box::Type::wall);
+                getBox(x, y).setType(Box::Type::wall);
                 // NOTE: for now disable map
                 // TODO: algorithm that picks appriopriate clip
                 // depending on neightbours
@@ -64,14 +65,14 @@ Board::Board(const std::string &filename) {
                 break;
             case '.':
                 ++totalPoints;
-                getBox(i, j).setType(Box::Type::point);
+                getBox(x, y).setType(Box::Type::point);
                 break;
             case '*':
                 ++totalPoints;
-                getBox(i, j).setType(Box::Type::super_point);
+                getBox(x, y).setType(Box::Type::super_point);
                 break;
             case '-':
-                getBox(i, j).setType(Box::Type::empty);
+                getBox(x, y).setType(Box::Type::empty);
                 break;
             }
         }

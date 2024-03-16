@@ -30,7 +30,7 @@ int main() {
     Game game;
     bool quit = false;
     SDL_Event e;
-    Board board("./level1.txt");
+    Board board("./levels/level1.txt");
 
     Pacman pacman(game.get_points_ref(), board.getPacmanStart().x,
                   board.getPacmanStart().y);

@@ -53,7 +53,8 @@ Game::Game() {
 }
 
 void Game::load_media() {
-    Game::gFont = TTF_OpenFont("./Oswald-VariableFont_wght.ttf", Box::size);
+    Game::gFont =
+        TTF_OpenFont("./fonts/Oswald-VariableFont_wght.ttf", Box::size);
     if (!Game::gFont) {
         std::printf("Failed to load font! SDL_ttf Error: %s\n", TTF_GetError());
         throw std::runtime_error{"Failed to load font"};
@@ -61,7 +62,7 @@ void Game::load_media() {
 
     //***************************************************
 
-    if (!Pacman::sprite.loadFromFile("./pacman_sprite.png")) {
+    if (!Pacman::sprite.loadFromFile("./textures/pacman_sprite.png")) {
         std::printf("Failed to load pacman sprite! SDL_ttf Error: %s\n",
                     IMG_GetError());
         throw std::runtime_error{"Failed to load pacman sprite"};
@@ -94,7 +95,7 @@ void Game::load_media() {
 
     //***************************************************
 
-    if (!Board::mapTexture.loadFromFile("./map_sprite.png")) {
+    if (!Board::mapTexture.loadFromFile("./textures/map_sprite.png")) {
         std::printf("Failed to load map sprite! SDL_ttf Error: %s\n",
                     IMG_GetError());
         throw std::runtime_error{"Failed to load map sprite"};

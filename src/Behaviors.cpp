@@ -106,7 +106,7 @@ void PacmanSuperPointBehavior::move(Board &b, Entity &ghost) {
 
     if (pacman.attackerTime.getTicks() > 5'000) {
         pacman.attackerTime.stop();
-        // ghost.setAttack();
+        ghost.setAttack();
         pacman.setAttack(false);
     }
 

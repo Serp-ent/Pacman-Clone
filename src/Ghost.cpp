@@ -54,10 +54,9 @@ void Ghost::setAttack(bool attack) {
     // cast to prevent many memory allocations
     // TODO: find better way
     if (attacker) {
-        DumbGhostBehavior *b =
-            dynamic_cast<DumbGhostBehavior *>(behavior.get());
+        RedGhostBehavior *b = dynamic_cast<RedGhostBehavior *>(behavior.get());
         if (!b) {
-            behavior.reset(new DumbGhostBehavior{*this});
+            behavior.reset(new RedGhostBehavior{*this});
         }
     } else {
         GhostRunAwayBehavior *b =
@@ -70,17 +69,16 @@ void Ghost::setAttack(bool attack) {
 
 void Ghost::clearState(bool death) {
     Entity::clearState(death);
-    if (isDead) {
-        GhostDeathBehavior *b =
-            dynamic_cast<GhostDeathBehavior *>(behavior.get());
-        if (!b) {
-            behavior.reset(new GhostDeathBehavior{*this});
-        }
-    } else {
-        DumbGhostBehavior *b =
-            dynamic_cast<DumbGhostBehavior *>(behavior.get());
-        if (!b) {
-            behavior.reset(new DumbGhostBehavior{*this});
-        }
-    }
+    // if (isDead) {
+    //     GhostDeathBehavior *b =
+    //         dynamic_cast<GhostDeathBehavior *>(behavior.get());
+    //     if (!b) {
+    //         behavior.reset(new GhostDeathBehavior{*this});
+    //     }
+    // } else {
+    //     RedGhostBehavior *b = dynamic_cast<RedGhostBehavior *>(behavior.get());
+    //     if (!b) {
+    //         behavior.reset(new RedGhostBehavior{*this});
+    //     }
+    // }
 }

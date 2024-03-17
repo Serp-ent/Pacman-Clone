@@ -39,9 +39,12 @@ class PacmanSuperPointBehavior : public Behavior {
 // TODO:
 class RedGhostBehavior : public Behavior {
   public:
-    virtual void move(Board &b, Entity &e) override {
-        // chase pacman // MOSG aggressive
-    }
+    RedGhostBehavior(Ghost &g) : ghost(g) {}
+    virtual void move(Board &b, Entity &e) override;
+
+  private:
+    Ghost &ghost;
+    std::vector<Graph::BoxNode *> path;
 };
 
 // INFO: testing purpose only
@@ -68,9 +71,9 @@ class GhostRunAwayBehavior : public Behavior {
 // TODO:
 class GhostDeathBehavior : public Behavior {
   public:
-    GhostDeathBehavior(Ghost& g): ghost{g} {};
+    GhostDeathBehavior(Ghost &g) : ghost{g} {};
 
-    void loadPathToHome(Board& b);
+    void loadPathToHome(Board &b);
 
     virtual void move(Board &b, Entity &e) override;
 

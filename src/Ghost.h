@@ -24,7 +24,7 @@ class Ghost : public Entity {
     Ghost() {
         currRect = &spriteClips[directionSprite];
         attacker = true;
-        behavior.reset(new DumbGhostBehavior(*this));
+        behavior.reset(new RedGhostBehavior(*this));
     }
     Ghost(int x, int y) : Ghost{} {
         texture.x = x;
@@ -41,7 +41,6 @@ class Ghost : public Entity {
         newBehavior->loadPathToHome(b);
 
         behavior.reset(newBehavior);
-
     }
     virtual void clearState(bool death = false) override;
     virtual void setAttack(bool attack = true) override;
@@ -49,6 +48,7 @@ class Ghost : public Entity {
   private:
     friend class DumbGhostBehavior;
     friend class GhostDeathBehavior;
+    friend class RedGhostBehavior;
 
     // TODO: add sprite
     int directionSprite = 0;

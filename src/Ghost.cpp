@@ -62,7 +62,7 @@ void Ghost::setAttack(bool attack) {
         GhostRunAwayBehavior *b =
             dynamic_cast<GhostRunAwayBehavior *>(behavior.get());
         if (!b) {
-            behavior.reset(new GhostRunAwayBehavior{});
+            behavior.reset(new GhostRunAwayBehavior{*this});
         }
     }
 }
@@ -76,8 +76,8 @@ void Ghost::clearState(bool death) {
     //         behavior.reset(new GhostDeathBehavior{*this});
     //     }
     // } else {
-    //     RedGhostBehavior *b = dynamic_cast<RedGhostBehavior *>(behavior.get());
-    //     if (!b) {
+    //     RedGhostBehavior *b = dynamic_cast<RedGhostBehavior
+    //     *>(behavior.get()); if (!b) {
     //         behavior.reset(new RedGhostBehavior{*this});
     //     }
     // }

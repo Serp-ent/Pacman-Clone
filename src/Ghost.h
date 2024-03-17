@@ -49,6 +49,7 @@ class Ghost : public Entity {
     friend class DumbGhostBehavior;
     friend class GhostDeathBehavior;
     friend class RedGhostBehavior;
+    friend class GhostRunAwayBehavior;
 
     // TODO: add sprite
     int directionSprite = 0;

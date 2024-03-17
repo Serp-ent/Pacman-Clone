@@ -63,9 +63,12 @@ class DumbGhostBehavior : public Behavior {
 // TODO:
 class GhostRunAwayBehavior : public Behavior {
   public:
-    virtual void move(Board &b, Entity &e) override {
-        // run away from pacman
-    }
+    GhostRunAwayBehavior(Ghost &g) : ghost{g} {}
+    virtual void move(Board &b, Entity &e) override;
+
+  private:
+    Ghost &ghost;
+    std::vector<Graph::BoxNode *> path;
 };
 
 // TODO:

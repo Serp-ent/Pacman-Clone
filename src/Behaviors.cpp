@@ -1,4 +1,5 @@
 #include "Behaviors.h"
+#include <random>
 #include <unistd.h>
 
 #include "Board.h"
@@ -6,6 +7,7 @@
 #include "utils.h"
 #include <SDL2/SDL_rect.h>
 #include <cstdio>
+#include <vector>
 
 void PacmanDefaultBehavior::move(Board &b, Entity &ghost) {
     // TODO: maybe check that entiy != pacman to prevent killing itself
@@ -491,81 +493,52 @@ void GhostRunAwayBehavior::move(Board &b, Entity &pacman) {
     };
 
     BoxPos ghostPos = {
-        (ghost.getPos().x - b.getPos().x) / Box::size,
-        (ghost.getPos().y - b.getPos().y) / Box::size,
+        (ghost.getPos().x - b.getPos().x + Ghost::width / 2) / Box::size,
+        (ghost.getPos().y - b.getPos().y + Ghost::height / 2) / Box::size,
     };
     BoxPos pacmanPos = {
         (pacman.getPos().x - b.getPos().x) / Box::size,
         (pacman.getPos().y - b.getPos().y) / Box::size,
     };
 
+    // TODO: reset path sometimes
     if (path.empty()) {
         path = breadthFirstSearch(b.graph, ghostPos.x, ghostPos.y, pacmanPos.x,
                                   pacmanPos.y);
     }
 
-    static int frame = 0;
-    if (frame == 20) {
-        Graph::BoxNode *p = path.back();
-        // TODO: move path that is further away
-        BoxPos NewBoxPos = {
-            (ghost.getPos().x - b.getPos().x) / Box::size,
-            (ghost.getPos().y - b.getPos().y) / Box::size,
-        };
-
-        Graph::BoxNode *relative = path.at(path.size() - 2);
-        for (auto n : path.back()->neighbors) {
-            if (n == relative) {
+    Graph::BoxNode *dest = path.back();
+    if (dest->x == ghostPos.x && dest->y == ghostPos.y) {
+        for (Graph::BoxNode *v : path.back()->neighbors) {
+            if (v == dest || v == path.at(path.size() - 2)) {
                 continue;
             }
 
-            NewBoxPos.x = n->x;
-            NewBoxPos.y = n->y;
+            // TODO: pick random from neighbours to avoid looping
+
+            dest = v;
             break;
         }
-
-        int index = NewBoxPos.y * b.columns() + NewBoxPos.x;
-        path.push_back(b.graph.nodes[index]);
-
-        SDL_Point new_pos{b.getPos().x + NewBoxPos.x * Box::size,
-                          b.getPos().y + NewBoxPos.y * Box::size};
-
-        ghost.setPos(new_pos);
-        frame = 0;
+        // TODO: pop front from path or check if we have shortert path while
+        // running away to prevent going straight to pacman
+        path.push_back(dest);
     }
-    ++frame;
 
-    // // TODO: non-random decisions
-    // static int moveNumber = 0;
-    // if (moveNumber == 40) {
-    //     int direction = random();
-    //     // TODO: velocity
-    //     // TODO: get rid of magic constants
-    //     ghost.velocity_y = 0;
-    //     ghost.velocity_x = 0;
-    //     switch (direction % 4) {
-    //     case 0:
-    //         ghost.directionSprite = 0;
-    //         ghost.velocity_x += 2;
-    //         break;
-    //     case 1:
-    //         ghost.directionSprite = 2;
-    //         ghost.velocity_x -= 2;
-    //         break;
-    //     case 2:
-    //         ghost.directionSprite = 4;
-    //         ghost.velocity_y -= 2;
-    //         break;
-    //     case 3:
-    //         ghost.directionSprite = 6;
-    //         ghost.velocity_y += 2;
-    //         break;
-    //     }
-
-    //     moveNumber = 0;
-    // }
-
-    // ++moveNumber;
+    ghost.velocity_y = 0;
+    ghost.velocity_x = 0;
+    if (dest->x > ghostPos.x) {
+        ghost.directionSprite = 0;
+        ghost.velocity_x += 2;
+    } else if (dest->x < ghostPos.x) {
+        ghost.directionSprite = 2;
+        ghost.velocity_x -= 2;
+    } else if (dest->y < ghostPos.y) {
+        ghost.directionSprite = 4;
+        ghost.velocity_y -= 2;
+    } else if (dest->y > ghostPos.y) {
+        ghost.directionSprite = 6;
+        ghost.velocity_y += 2;
+    }
 
     SDL_Rect border{b.getPos().x, b.getPos().y, b.columns() * Box::size,
                     b.rows() * Box::size};

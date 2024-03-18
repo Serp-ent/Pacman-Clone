@@ -8,12 +8,7 @@
 class Pacman;
 class Board;
 
-// TODO: ghost should be abstract class
-// and there each ghost should have different level of aggression (different
-// algorithm) and differnet behavior (maybe strategy pattern instead of
-// inheritance)
 class Ghost : public Entity {
-    // TODO: set random point that Ghost travel to
   public:
     // TODO: clips should be in one array accessed by macros for each state
     static constexpr int frames = 10;

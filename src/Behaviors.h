@@ -35,8 +35,6 @@ class PacmanSuperPointBehavior : public Behavior {
     Pacman &pacman;
 };
 
-// TODO: different ghost behaviors
-// TODO:
 class RedGhostBehavior : public Behavior {
   public:
     RedGhostBehavior(Ghost &g) : ghost(g) {}
@@ -47,8 +45,7 @@ class RedGhostBehavior : public Behavior {
     std::vector<Graph::BoxNode *> path;
 };
 
-// INFO: testing purpose only
-// moves in random direction
+// INFO: testing purpose only moves in random direction
 class DumbGhostBehavior : public Behavior {
   public:
     DumbGhostBehavior(Ghost &g) : ghost(g) {}
@@ -60,7 +57,6 @@ class DumbGhostBehavior : public Behavior {
 };
 
 // INFO: all ghost behave the same when running away from pacman
-// TODO:
 class GhostRunAwayBehavior : public Behavior {
   public:
     GhostRunAwayBehavior(Ghost &g) : ghost{g} {}
@@ -71,7 +67,6 @@ class GhostRunAwayBehavior : public Behavior {
     std::vector<Graph::BoxNode *> path;
 };
 
-// TODO:
 class GhostDeathBehavior : public Behavior {
   public:
     GhostDeathBehavior(Ghost &g) : ghost{g} {};

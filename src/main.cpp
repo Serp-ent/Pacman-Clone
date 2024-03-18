@@ -23,9 +23,6 @@
 // TODO: create level designer in SDL2 that creates textfile with map
 // TODO: use SDL functions with unique_ptr
 
-// TODO: inherit from Enitty object
-// create GHOST enemy
-
 int main() {
     Game game;
     bool quit = false;
@@ -48,8 +45,6 @@ int main() {
     int frames = 0;
     fpsTimer.start();
     while (!quit) {
-        // TODO: DON't start game until user presses key
-        // pacman should be default sprite (yellow ball) until game has started
         while (SDL_PollEvent(&e)) {
             if (e.type == SDL_QUIT) {
                 quit = true;
@@ -123,7 +118,6 @@ int main() {
             // TODO: set position (the map/level should know where pacman
             // and ghost start position is)
             int lives = pacman.getLifesLeft();
-            // HACK: reset pacman and ghost position
             pacman.setPos(board.getPacmanStart());
             pacman.setLifesLeft(lives);
 

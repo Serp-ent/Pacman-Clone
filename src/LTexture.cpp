@@ -17,8 +17,7 @@ LTexture::~LTexture() {
     free();
 }
 
-// TODO: take reference instead of copy-by-value
-bool LTexture::loadFromFile(std::string path) {
+bool LTexture::loadFromFile(const std::string &path) {
     // Get rid of preexisting texture
     free();
     // The final texture

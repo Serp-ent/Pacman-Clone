@@ -13,7 +13,7 @@ class LTexture {
     ~LTexture();
 
     // Loads image at specified path
-    bool loadFromFile(std::string path);
+    bool loadFromFile(const std::string& path);
 
     // Deallocates texture
     void free();

@@ -338,6 +338,7 @@ void GhostDeathBehavior::move(Board &b, Entity &e) {
 }
 
 void RedGhostBehavior::move(Board &b, Entity &pacman) {
+    // TODO: ghost should move smoothly
     struct BoxPos {
         int x, y;
     };
@@ -455,6 +456,7 @@ void RedGhostBehavior::move(Board &b, Entity &pacman) {
 }
 
 void GhostRunAwayBehavior::move(Board &b, Entity &pacman) {
+    // TODO: ghost should move smoothly
     struct BoxPos {
         int x, y;
     };

@@ -1,6 +1,7 @@
 #include "Graph.h"
 #include "Behaviors.h"
 #include "Board.h"
+#include <algorithm>
 #include <cstdio>
 
 void Graph::setBoard(Board &b) {
@@ -45,12 +46,24 @@ void Graph::addNode(int x, int y) {
 
 // Connect two nodes (add an edge between them)
 void Graph::connectNodes(int x1, int y1, int x2, int y2) {
-    // TODO: don't connect if there already exists edge
+    if (exists(x1, y1, x2, y2)) {
+        return;
+    }
+
     int nodeId1 = y1 * board->columns() + x1;
     int nodeId2 = y2 * board->columns() + x2;
 
     nodes[nodeId1]->neighbors.push_back(nodes[nodeId2]);
     nodes[nodeId2]->neighbors.push_back(nodes[nodeId1]);
+}
+
+bool Graph::exists(int x1, int y1, int x2, int y2) {
+    int nodeId1 = y1 * board->columns() + x1;
+    int nodeId2 = y2 * board->columns() + x2;
+    auto p = std::find(nodes[nodeId1]->neighbors.begin(),
+                       nodes[nodeId1]->neighbors.end(), nodes[nodeId2]);
+
+    return p != nodes[nodeId1]->neighbors.end();
 }
 
 // Breadth-First Search algorithm

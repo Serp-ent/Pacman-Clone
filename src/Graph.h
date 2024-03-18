@@ -29,6 +29,8 @@ class Graph {
     // Connect two nodes (add an edge between them)
     void connectNodes(int x1, int y1, int x2, int y2);
 
+    bool exists(int x1, int y1, int x2, int y2);
+
     int columns() const;
     int rows() const;
 

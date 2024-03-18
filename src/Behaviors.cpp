@@ -331,10 +331,6 @@ void GhostDeathBehavior::move(Board &b, Entity &e) {
         path.pop_back();
     }
     ++frame;
-    // ghost.setPos(b.getGhostStart());
-
-    // TODO:
-    // when return to base switch behavior
 }
 
 void RedGhostBehavior::move(Board &b, Entity &pacman) {
@@ -342,12 +338,12 @@ void RedGhostBehavior::move(Board &b, Entity &pacman) {
     struct BoxPos {
         int x, y;
     };
+    BoxPos ghostPos = {
+        (ghost.getPos().x - b.getPos().x + Ghost::width / 2) / Box::size,
+        (ghost.getPos().y - b.getPos().y + Ghost::height / 2) / Box::size,
+    };
 
     if (path.empty()) {
-        BoxPos ghostPos = {
-            (ghost.getPos().x - b.getPos().x) / Box::size,
-            (ghost.getPos().y - b.getPos().y) / Box::size,
-        };
         BoxPos basePos = {
             (pacman.getPos().x - b.getPos().x) / Box::size,
             (pacman.getPos().y - b.getPos().y) / Box::size,
@@ -357,18 +353,26 @@ void RedGhostBehavior::move(Board &b, Entity &pacman) {
                                   basePos.y);
     }
 
-    static int frame = 0;
-    if (frame == 20) {
-        Graph::BoxNode *p = path.back();
-        SDL_Point new_pos{b.getPos().x + p->x * Box::size,
-                          b.getPos().y + p->y * Box::size};
-
-        ghost.setPos(new_pos);
-        path.pop_back();
-
-        frame = 0;
+    Graph::BoxNode *dest = path.back();
+    ghost.velocity_y = 0;
+    ghost.velocity_x = 0;
+    if (dest->x > ghostPos.x) {
+        ghost.directionSprite = 0;
+        ghost.velocity_x += 2;
+    } else if (dest->x < ghostPos.x) {
+        ghost.directionSprite = 2;
+        ghost.velocity_x -= 2;
+    } else if (dest->y < ghostPos.y) {
+        ghost.directionSprite = 4;
+        ghost.velocity_y -= 2;
+    } else if (dest->y > ghostPos.y) {
+        ghost.directionSprite = 6;
+        ghost.velocity_y += 2;
     }
-    ++frame;
+
+    if (dest->x == ghostPos.x && dest->y == ghostPos.y) {
+        path.pop_back();
+    }
 
     // // TODO: non-random decisions
     // static int moveNumber = 0;

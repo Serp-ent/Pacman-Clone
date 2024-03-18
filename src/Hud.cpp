@@ -27,7 +27,18 @@ void Hud::render() {
                        Game::screen_height - (Pacman::width)-10, Pacman::width,
                        Pacman::height};
     for (int i = 0; i < livesLeft; ++i) {
-        Pacman::sprite.render(dest_size.x, dest_size.y, Pacman::spriteClips[0], dest_size);
+        Pacman::sprite.render(dest_size.x, dest_size.y, Pacman::spriteClips[0],
+                              dest_size);
         dest_size.x += Pacman::width;
     }
+}
+
+void Hud::gamePaused() {
+    SDL_SetRenderDrawColor(Game::gRenderer, 0, 0, 0, 0xFF);
+    SDL_RenderClear(Game::gRenderer);
+    paused_texture.render(
+        Game::screen_width / 2 - points_texture.getWidth() / 2,
+        Game::screen_height / 2 - points_texture.getHeight() / 2);
+
+    SDL_RenderPresent(Game::gRenderer);
 }

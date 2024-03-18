@@ -7,6 +7,9 @@
 #include "Timer.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_events.h>
+#include <SDL2/SDL_keycode.h>
+#include <SDL2/SDL_render.h>
+#include <SDL2/SDL_timer.h>
 #include <SDL2/SDL_ttf.h>
 #include <cstdio>
 #include <sstream>
@@ -43,6 +46,7 @@ int main() {
     Hud hud;
     Timer fpsTimer;
     int frames = 0;
+    bool isPaused = false;
     fpsTimer.start();
     while (!quit) {
         while (SDL_PollEvent(&e)) {
@@ -50,6 +54,9 @@ int main() {
                 quit = true;
             } else if (e.type == SDL_KEYDOWN) {
                 switch (e.key.keysym.sym) {
+                case SDLK_ESCAPE:
+                    isPaused = !isPaused;
+                    break;
                 case SDLK_UP:
                 case SDLK_DOWN:
                 case SDLK_RIGHT:
@@ -62,6 +69,12 @@ int main() {
             if (!pacman.playsDeathAnimation()) {
                 pacman.handleEvent(e);
             }
+        }
+
+        if (isPaused) {
+            hud.gamePaused();
+            ++frames;
+            continue;
         }
 
         if (game.isEnd()) {

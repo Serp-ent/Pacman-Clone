@@ -7,8 +7,10 @@
 #include "Timer.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_events.h>
+#include <SDL2/SDL_keyboard.h>
 #include <SDL2/SDL_keycode.h>
 #include <SDL2/SDL_render.h>
+#include <SDL2/SDL_surface.h>
 #include <SDL2/SDL_timer.h>
 #include <SDL2/SDL_ttf.h>
 #include <cstdio>
@@ -25,6 +27,34 @@
 
 // TODO: create level designer in SDL2 that creates textfile with map
 // TODO: use SDL functions with unique_ptr
+
+struct MenuItem {
+    MenuItem(const std::string &t) { text.loadText(t, white); }
+
+    SDL_Rect rect;
+    TextTexture text;
+
+    void render() {
+        SDL_SetRenderDrawColor(Game::gRenderer, 0, 0, 0, 0xFF);
+        SDL_RenderClear(Game::gRenderer);
+        text.render(rect.x + rect.w / 2 - text.getWidth() / 2,
+                    rect.y + rect.h / 2 - text.getHeight() / 2);
+        SDL_SetRenderDrawColor(Game::gRenderer, 255, 0, 0, 0xFF);
+        SDL_RenderDrawRect(Game::gRenderer, &rect);
+        SDL_RenderPresent(Game::gRenderer);
+    }
+};
+
+bool mouseOver(const MenuItem &item, int mouseX, int mouseY) {
+    if (item.rect.x > mouseX || item.rect.x + item.rect.w < mouseX) {
+        return false;
+    }
+    if (item.rect.y > mouseY || item.rect.y + item.rect.h < mouseY) {
+        return false;
+    }
+
+    return true;
+}
 
 int main() {
     Game game;
@@ -47,7 +77,10 @@ int main() {
     Timer fpsTimer;
     int frames = 0;
     bool isPaused = false;
-    fpsTimer.start();
+    MenuItem start{"Start"};
+    start.rect = {Game::screen_width / 4, Game::screen_height / 4,
+                  Game::screen_width / 2, Game::screen_height / 8};
+    bool gameStarted = false;
     while (!quit) {
         while (SDL_PollEvent(&e)) {
             if (e.type == SDL_QUIT) {
@@ -64,11 +97,24 @@ int main() {
                     pacman.start();
                     break;
                 }
+            } else if (e.type == SDL_MOUSEBUTTONDOWN) {
+                int mouseX, mouseY;
+                SDL_GetMouseState(&mouseX, &mouseY);
+                if (mouseOver(start, mouseX, mouseY)) {
+                    printf("Menu::start clicked\n");
+                    gameStarted = true;
+                    fpsTimer.start();
+                }
             }
 
             if (!pacman.playsDeathAnimation()) {
                 pacman.handleEvent(e);
             }
+        }
+
+        if (!gameStarted) {
+            start.render();
+            continue;
         }
 
         if (isPaused) {

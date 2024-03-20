@@ -7,6 +7,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_rect.h>
 #include <memory>
+#include <stack>
 #include <string>
 #include <vector>
 
@@ -43,24 +44,32 @@ class StartGameAction : public Action {
     bool &gameStarted;
 };
 
+class OpenSubMenuAction : public Action {
+  public:
+  private:
+};
+
 //******************************************************************************
 
-struct MenuItem {
+class MenuItem {
   public:
-    MenuItem(const std::string &t, int x, int y, int w, int h,
-             std::unique_ptr<Action> a)
-        : rect{x, y, w, h}, action{std::move(a)} {
-        text.loadText(t, white);
+    MenuItem(const std::string &label, std::unique_ptr<Action> a)
+        : action{std::move(a)} {
+        text.loadText(label, white);
     }
+    virtual ~MenuItem() {}
 
-    void render() {
+    void setRect(int x, int y, int w, int h) { rect = {x, y, w, h}; }
+
+    virtual void render() {
         text.render(rect.x + rect.w / 2 - text.getWidth() / 2,
                     rect.y + rect.h / 2 - text.getHeight() / 2);
 
         SDL_SetRenderDrawColor(Game::gRenderer, 255, 0, 0, 0xFF);
         SDL_RenderDrawRect(Game::gRenderer, &rect);
     }
-
+    // virtual void handleAction() = 0;
+    //
     bool isMouseOver(int mouseX, int mouseY) {
         // TODO: use a SDL_inRect function or something like that
         if (rect.x > mouseX || rect.x + rect.w < mouseX) {
@@ -73,59 +82,131 @@ struct MenuItem {
         return true;
     }
 
-    void invokeAction() { action->execute(); }
+    void invokeAction() {
+        if (action)
+            action->execute();
+        else
+            printf("MenuItem:: action not connected\n");
+    };
 
-  private:
+  protected:
     std::unique_ptr<Action> action;
 
     SDL_Rect rect;
     TextTexture text;
 };
 
-class Menu {
+class MenuItemLeaf : public MenuItem {
   public:
-    Menu(int x, int y, int w, int h)
-        : topleft{x, y}, itemWidth(w), itemHeight(h) {}
+    MenuItemLeaf(const std::string &t, int x, int y, int w, int h,
+                 std::unique_ptr<Action> a)
+        : MenuItem{t, std::move(a)} {
+        rect = {x, y, w, h};
+    }
+
+    void invokeAction() { action->execute(); }
+
+  private:
+};
+
+class MenuBox : public MenuItem {
+  public:
+    MenuBox(const std::string &label, std::unique_ptr<Action> a)
+        : MenuItem(label, std::move(a)) {}
 
     void addItem(const std::string &name, std::unique_ptr<Action> action) {
         int startX = topleft.x;
         int startY = topleft.y + items.size() * (itemHeight + padding);
 
-        auto item = std::make_unique<MenuItem>(name, startX, startY, itemWidth,
-                                               itemHeight, std::move(action));
+        auto item = std::make_unique<MenuItemLeaf>(
+            name, startX, startY, itemWidth, itemHeight, std::move(action));
+        items.push_back(std::move(item));
+    }
+
+    void addItem(std::unique_ptr<MenuItemLeaf> item) {
+        // TODO: function calculate start pos for new element
+        int startX = topleft.x;
+        int startY = topleft.y + items.size() * (itemHeight + padding);
+
+        item->setRect(startY, startY, itemWidth, itemHeight);
         items.push_back(std::move(item));
     }
 
     void setPadding(int p) { padding = p; }
 
-    void render() {
+    virtual void render() override {
+        // if (renderAsItem) {
+        //     MenuItem::render();
+        //     return;
+        // }
+
         for (auto &i : items) {
             i->render();
         }
     }
 
     bool handleMouse(int mouseX, int mouseY) {
-        int which = 0;
         for (auto &i : items) {
             if (i->isMouseOver(mouseX, mouseY)) {
                 i->invokeAction();
                 return true;
             }
-
-            ++which;
         }
         return false;
     }
 
-  private:
-    // BUG: should be MenuItem instead of pointers but it doesn't work when
-    // having values
     std::vector<std::unique_ptr<MenuItem>> items;
-    SDL_Point topleft;
 
-    int padding = 0;
-    int itemWidth;
-    int itemHeight;
+  private:
+    SDL_Point topleft{0, 0};
+
+    int padding = 5;
+    int itemWidth = 100;
+    int itemHeight = 50;
+};
+
+//*******************************************************************************
+
+// TODO: builder pattern
+class Menu {
+  public:
+    void renderMenu() {
+        if (!menuStack.empty()) {
+            auto &currentMenu = menuStack.top();
+            currentMenu->render();
+        } else {
+            std::cout << "No menu to render!" << std::endl;
+        }
+    }
+
+    bool handleMouse(int mouseX, int mouseY) {
+        if (!menuStack.empty()) {
+            for (auto &i : menuStack.top()->items) {
+                if (i->isMouseOver(mouseX, mouseY)) {
+                    i->invokeAction();
+                    return true;
+                }
+            }
+        } else {
+            std::cout << "No menu to handleMouse!" << std::endl;
+        }
+        return false;
+    }
+
+    void pushMenu(std::unique_ptr<MenuBox> menuItems) {
+        menuStack.push(std::move(menuItems));
+    }
+
+    void popMenu() {
+        if (!menuStack.empty()) {
+            menuStack.pop();
+        } else {
+            std::cout << "Cannot pop from empty menu stack!" << std::endl;
+        }
+    }
+
+  private:
+    std::stack<std::unique_ptr<MenuBox>> menuStack;
 };
 
 #endif // !GAME_MENU_H

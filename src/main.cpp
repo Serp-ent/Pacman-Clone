@@ -53,19 +53,26 @@ int main() {
     bool isPaused = false;
     constexpr int padding = 5;
 
-    Menu mainMenu{Game::screen_width / 4, Game::screen_height / 4,
-                  Game::screen_width / 2, Game::screen_height / 8};
-    mainMenu.setPadding(10);
-
     bool gameStarted = false;
 
+    //***********************************************************************************
+    // TODO: builder pattern to building menu
     auto openSettings = std::make_unique<OpenSettingsAction>();
     auto startGame = std::make_unique<StartGameAction>(gameStarted);
     auto quitGame = std::make_unique<QuitAction>(quit);
 
-    mainMenu.addItem("start", std::move(startGame));
-    mainMenu.addItem("settings", std::move(openSettings));
-    mainMenu.addItem("quit", std::move(quitGame));
+    std::unique_ptr<Menu> menu = std::make_unique<Menu>();
+
+    auto mainMenu = std::make_unique<MenuBox>("MainMenu", nullptr);
+    mainMenu->addItem("Start", std::move(startGame));
+
+    mainMenu->addItem("Settings", nullptr);
+
+    mainMenu->addItem("Quit", std::move(quitGame));
+
+    menu->pushMenu(std::move(mainMenu));
+
+    //***********************************************************************************
 
     while (!quit) {
         while (SDL_PollEvent(&e)) {
@@ -86,7 +93,7 @@ int main() {
             } else if (!gameStarted && e.type == SDL_MOUSEBUTTONDOWN) {
                 int mouseX, mouseY;
                 SDL_GetMouseState(&mouseX, &mouseY);
-                if (mainMenu.handleMouse(mouseX, mouseY)) {
+                if (menu->handleMouse(mouseX, mouseY)) {
                     printf("Menu::start clicked\n");
                     fpsTimer.start(); // TODO: fps timer should be in some
                                       // screen class
@@ -102,7 +109,7 @@ int main() {
         SDL_RenderClear(Game::gRenderer);
 
         if (!gameStarted) {
-            mainMenu.render();
+            menu->renderMenu();
             SDL_RenderPresent(Game::gRenderer);
 
             continue;

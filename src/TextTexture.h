@@ -19,6 +19,7 @@ class TextTexture {
     int getHeight() const { return height; };
 
   private:
+    // TODO: add text string to retrieve current text from texture
     SDL_Texture *texture;
 
     int width;

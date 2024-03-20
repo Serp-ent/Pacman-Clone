@@ -11,83 +11,21 @@
 #include <string>
 #include <vector>
 
-class Action {
-  public:
-    virtual ~Action() {}
-
-    virtual void execute() = 0;
-};
-
-class OpenSettingsAction : public Action {
-  public:
-    OpenSettingsAction() {}
-
-    void execute() override { printf("Open settings submenu\n"); }
-};
-
-class QuitAction : public Action {
-  public:
-    QuitAction(bool &flag) : end{flag} {}
-    void execute() override { end = true; }
-
-  private:
-    bool &end;
-};
-
-class StartGameAction : public Action {
-  public:
-    StartGameAction(bool &flag) : gameStarted{flag} {}
-
-    void execute() override { gameStarted = true; }
-
-  private:
-    bool &gameStarted;
-};
-
-class OpenSubMenuAction : public Action {
-  public:
-  private:
-};
-
-//******************************************************************************
+class Action;
 
 class MenuItem {
   public:
-    MenuItem(const std::string &label, std::unique_ptr<Action> a)
-        : action{std::move(a)} {
-        text.loadText(label, white);
-    }
+    MenuItem(const std::string &label, std::unique_ptr<Action> a);
     virtual ~MenuItem() {}
 
-    void setRect(int x, int y, int w, int h) { rect = {x, y, w, h}; }
+    void setRect(int x, int y, int w, int h);
 
-    virtual void render() {
-        text.render(rect.x + rect.w / 2 - text.getWidth() / 2,
-                    rect.y + rect.h / 2 - text.getHeight() / 2);
-
-        SDL_SetRenderDrawColor(Game::gRenderer, 255, 0, 0, 0xFF);
-        SDL_RenderDrawRect(Game::gRenderer, &rect);
-    }
+    virtual void render();
     // virtual void handleAction() = 0;
     //
-    bool isMouseOver(int mouseX, int mouseY) {
-        // TODO: use a SDL_inRect function or something like that
-        if (rect.x > mouseX || rect.x + rect.w < mouseX) {
-            return false;
-        }
-        if (rect.y > mouseY || rect.y + rect.h < mouseY) {
-            return false;
-        }
+    bool isMouseOver(int mouseX, int mouseY);
 
-        return true;
-    }
-
-    void invokeAction() {
-        if (action)
-            action->execute();
-        else
-            printf("MenuItem:: action not connected\n");
-    };
+    void invokeAction();
 
   protected:
     std::unique_ptr<Action> action;
@@ -99,61 +37,26 @@ class MenuItem {
 class MenuItemLeaf : public MenuItem {
   public:
     MenuItemLeaf(const std::string &t, int x, int y, int w, int h,
-                 std::unique_ptr<Action> a)
-        : MenuItem{t, std::move(a)} {
-        rect = {x, y, w, h};
-    }
+                 std::unique_ptr<Action> a);
 
-    void invokeAction() { action->execute(); }
+    void invokeAction();
 
   private:
 };
 
 class MenuBox : public MenuItem {
   public:
-    MenuBox(const std::string &label, std::unique_ptr<Action> a)
-        : MenuItem(label, std::move(a)) {}
+    MenuBox(const std::string &label, std::unique_ptr<Action> a);
 
-    void addItem(const std::string &name, std::unique_ptr<Action> action) {
-        int startX = topleft.x;
-        int startY = topleft.y + items.size() * (itemHeight + padding);
+    void addItem(const std::string &name, std::unique_ptr<Action> action);
 
-        auto item = std::make_unique<MenuItemLeaf>(
-            name, startX, startY, itemWidth, itemHeight, std::move(action));
-        items.push_back(std::move(item));
-    }
+    void addItem(std::unique_ptr<MenuItemLeaf> item);
 
-    void addItem(std::unique_ptr<MenuItemLeaf> item) {
-        // TODO: function calculate start pos for new element
-        int startX = topleft.x;
-        int startY = topleft.y + items.size() * (itemHeight + padding);
+    void setPadding(int p);
 
-        item->setRect(startY, startY, itemWidth, itemHeight);
-        items.push_back(std::move(item));
-    }
+    virtual void render() override;
 
-    void setPadding(int p) { padding = p; }
-
-    virtual void render() override {
-        // if (renderAsItem) {
-        //     MenuItem::render();
-        //     return;
-        // }
-
-        for (auto &i : items) {
-            i->render();
-        }
-    }
-
-    bool handleMouse(int mouseX, int mouseY) {
-        for (auto &i : items) {
-            if (i->isMouseOver(mouseX, mouseY)) {
-                i->invokeAction();
-                return true;
-            }
-        }
-        return false;
-    }
+    bool handleMouse(int mouseX, int mouseY);
 
     std::vector<std::unique_ptr<MenuItem>> items;
 
@@ -170,40 +73,13 @@ class MenuBox : public MenuItem {
 // TODO: builder pattern
 class Menu {
   public:
-    void renderMenu() {
-        if (!menuStack.empty()) {
-            auto &currentMenu = menuStack.top();
-            currentMenu->render();
-        } else {
-            std::cout << "No menu to render!" << std::endl;
-        }
-    }
+    void renderMenu();
 
-    bool handleMouse(int mouseX, int mouseY) {
-        if (!menuStack.empty()) {
-            for (auto &i : menuStack.top()->items) {
-                if (i->isMouseOver(mouseX, mouseY)) {
-                    i->invokeAction();
-                    return true;
-                }
-            }
-        } else {
-            std::cout << "No menu to handleMouse!" << std::endl;
-        }
-        return false;
-    }
+    bool handleMouse(int mouseX, int mouseY);
 
-    void pushMenu(std::unique_ptr<MenuBox> menuItems) {
-        menuStack.push(std::move(menuItems));
-    }
+    void pushMenu(std::unique_ptr<MenuBox> menuItems);
 
-    void popMenu() {
-        if (!menuStack.empty()) {
-            menuStack.pop();
-        } else {
-            std::cout << "Cannot pop from empty menu stack!" << std::endl;
-        }
-    }
+    void popMenu();
 
   private:
     std::stack<std::unique_ptr<MenuBox>> menuStack;

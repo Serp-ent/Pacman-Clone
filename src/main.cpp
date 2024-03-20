@@ -1,3 +1,4 @@
+#include "Action.h"
 #include "Board.h"
 #include "Box.h"
 #include "Ghost.h"
@@ -57,16 +58,22 @@ int main() {
 
     //***********************************************************************************
     // TODO: builder pattern to building menu
-    auto openSettings = std::make_unique<OpenSettingsAction>();
-    auto startGame = std::make_unique<StartGameAction>(gameStarted);
-    auto quitGame = std::make_unique<QuitAction>(quit);
 
     std::unique_ptr<Menu> menu = std::make_unique<Menu>();
 
+    auto settingsMenu = std::make_unique<MenuBox>("settings", nullptr);
+
+    auto moveBack = std::make_unique<GoBackAction>(*menu);
+    settingsMenu->addItem("Back", std::move(moveBack));
+
+    auto openSettings =
+        std::make_unique<OpenSubMenuAction>(*menu, std::move(settingsMenu));
+    auto startGame = std::make_unique<StartGameAction>(gameStarted);
+    auto quitGame = std::make_unique<QuitAction>(quit);
+
     auto mainMenu = std::make_unique<MenuBox>("MainMenu", nullptr);
     mainMenu->addItem("Start", std::move(startGame));
-
-    mainMenu->addItem("Settings", nullptr);
+    mainMenu->addItem("Settings", std::move(openSettings));
 
     mainMenu->addItem("Quit", std::move(quitGame));
 

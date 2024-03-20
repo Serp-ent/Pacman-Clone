@@ -2,6 +2,6 @@
 
 #include "Menu.h"
 
-void OpenSubMenuAction::execute() { menu.pushMenu(std::move(b)); }
+void OpenSubMenuAction::execute() { menu.pushMenu(*b); }
 
 void GoBackAction::execute() { menu.popMenu(); }

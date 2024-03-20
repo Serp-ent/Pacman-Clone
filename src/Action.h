@@ -3,6 +3,7 @@
 
 #include "Menu.h"
 #include <memory>
+#include <stdexcept>
 #include <stdio.h>
 
 class Menu;
@@ -35,18 +36,23 @@ class StartGameAction : public Action {
 
 class GoBackAction : public Action {
   public:
-    GoBackAction(Menu& m) : menu{m}{}
+    GoBackAction(Menu &m) : menu{m} {}
 
     void execute() override;
 
   private:
-    Menu& menu;
+    Menu &menu;
 };
 
 class OpenSubMenuAction : public Action {
   public:
     OpenSubMenuAction(Menu &m, std::unique_ptr<MenuBox> box)
-        : menu{m}, b{std::move(box)} {}
+        : menu{m}, b{std::move(box)} {
+        if (!b) {
+            throw std::runtime_error(
+                "OpenSubMenuAction: MenuBox argument is null");
+        }
+    }
 
     void execute() override;
 

@@ -111,9 +111,7 @@ bool Menu::handleMouse(int mouseX, int mouseY) {
     return false;
 }
 
-void Menu::pushMenu(std::unique_ptr<MenuBox> menuItems) {
-    menuStack.push(std::move(menuItems));
-}
+void Menu::pushMenu(MenuBox &menuItems) { menuStack.push(&menuItems); }
 
 void Menu::popMenu() {
     if (!menuStack.empty()) {

@@ -77,12 +77,13 @@ class Menu {
 
     bool handleMouse(int mouseX, int mouseY);
 
-    void pushMenu(std::unique_ptr<MenuBox> menuItems);
+    void pushMenu(MenuBox& menuItems);
 
     void popMenu();
 
   private:
-    std::stack<std::unique_ptr<MenuBox>> menuStack;
+    // don't take ownership
+    std::stack<MenuBox*> menuStack;
 };
 
 #endif // !GAME_MENU_H

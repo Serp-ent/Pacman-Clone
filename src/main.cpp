@@ -77,7 +77,7 @@ int main() {
 
     mainMenu->addItem("Quit", std::move(quitGame));
 
-    menu->pushMenu(std::move(mainMenu));
+    menu->pushMenu(*mainMenu);
 
     //***********************************************************************************
 

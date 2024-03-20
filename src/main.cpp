@@ -2,6 +2,7 @@
 #include "Box.h"
 #include "Ghost.h"
 #include "Hud.h"
+#include "Menu.h"
 #include "Pacman.h"
 #include "TextTexture.h"
 #include "Timer.h"
@@ -14,6 +15,7 @@
 #include <SDL2/SDL_timer.h>
 #include <SDL2/SDL_ttf.h>
 #include <cstdio>
+#include <memory>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -27,34 +29,6 @@
 
 // TODO: create level designer in SDL2 that creates textfile with map
 // TODO: use SDL functions with unique_ptr
-
-struct MenuItem {
-    MenuItem(const std::string &t) { text.loadText(t, white); }
-
-    SDL_Rect rect;
-    TextTexture text;
-
-    void render() {
-        SDL_SetRenderDrawColor(Game::gRenderer, 0, 0, 0, 0xFF);
-        SDL_RenderClear(Game::gRenderer);
-        text.render(rect.x + rect.w / 2 - text.getWidth() / 2,
-                    rect.y + rect.h / 2 - text.getHeight() / 2);
-        SDL_SetRenderDrawColor(Game::gRenderer, 255, 0, 0, 0xFF);
-        SDL_RenderDrawRect(Game::gRenderer, &rect);
-        SDL_RenderPresent(Game::gRenderer);
-    }
-};
-
-bool mouseOver(const MenuItem &item, int mouseX, int mouseY) {
-    if (item.rect.x > mouseX || item.rect.x + item.rect.w < mouseX) {
-        return false;
-    }
-    if (item.rect.y > mouseY || item.rect.y + item.rect.h < mouseY) {
-        return false;
-    }
-
-    return true;
-}
 
 int main() {
     Game game;
@@ -77,10 +51,22 @@ int main() {
     Timer fpsTimer;
     int frames = 0;
     bool isPaused = false;
-    MenuItem start{"Start"};
-    start.rect = {Game::screen_width / 4, Game::screen_height / 4,
+    constexpr int padding = 5;
+
+    Menu mainMenu{Game::screen_width / 4, Game::screen_height / 4,
                   Game::screen_width / 2, Game::screen_height / 8};
+    mainMenu.setPadding(10);
+
     bool gameStarted = false;
+
+    auto openSettings = std::make_unique<OpenSettingsAction>();
+    auto startGame = std::make_unique<StartGameAction>(gameStarted);
+    auto quitGame = std::make_unique<QuitAction>(quit);
+
+    mainMenu.addItem("start", std::move(startGame));
+    mainMenu.addItem("settings", std::move(openSettings));
+    mainMenu.addItem("quit", std::move(quitGame));
+
     while (!quit) {
         while (SDL_PollEvent(&e)) {
             if (e.type == SDL_QUIT) {
@@ -97,13 +83,13 @@ int main() {
                     pacman.start();
                     break;
                 }
-            } else if (e.type == SDL_MOUSEBUTTONDOWN) {
+            } else if (!gameStarted && e.type == SDL_MOUSEBUTTONDOWN) {
                 int mouseX, mouseY;
                 SDL_GetMouseState(&mouseX, &mouseY);
-                if (mouseOver(start, mouseX, mouseY)) {
+                if (mainMenu.handleMouse(mouseX, mouseY)) {
                     printf("Menu::start clicked\n");
-                    gameStarted = true;
-                    fpsTimer.start();
+                    fpsTimer.start(); // TODO: fps timer should be in some
+                                      // screen class
                 }
             }
 
@@ -112,8 +98,13 @@ int main() {
             }
         }
 
+        SDL_SetRenderDrawColor(Game::gRenderer, 0, 0, 0, 0xFF);
+        SDL_RenderClear(Game::gRenderer);
+
         if (!gameStarted) {
-            start.render();
+            mainMenu.render();
+            SDL_RenderPresent(Game::gRenderer);
+
             continue;
         }
 

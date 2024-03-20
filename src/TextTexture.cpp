@@ -1,7 +1,7 @@
 #include "TextTexture.h"
 
-#include <SDL2/SDL_ttf.h>
 #include "Game.h"
+#include <SDL2/SDL_ttf.h>
 
 void TextTexture::free() {
     if (!texture) {
@@ -23,7 +23,8 @@ bool TextTexture::loadText(const std::string &text, SDL_Color color) {
     // get rid of preexisintg texture
     free();
 
-    SDL_Surface *textSurface = TTF_RenderText_Solid(Game::gFont, text.c_str(), color);
+    SDL_Surface *textSurface =
+        TTF_RenderText_Solid(Game::gFont, text.c_str(), color);
     if (!textSurface) {
         std::printf("Unable to render text surface! SDL_ttf Error: %s\n",
                     TTF_GetError());

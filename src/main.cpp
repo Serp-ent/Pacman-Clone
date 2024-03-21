@@ -52,29 +52,34 @@ int main() {
     Timer fpsTimer;
     int frames = 0;
     bool isPaused = false;
-    constexpr int padding = 5;
-
     bool gameStarted = false;
 
     //***********************************************************************************
     // TODO: builder pattern to building menu
 
-    std::unique_ptr<Menu> menu = std::make_unique<Menu>();
+    int itemWidth = Game::screen_width / 2;
+    int itemHeight = Game::screen_height / 8;
+    int menuXpos = Game::screen_width / 2 - itemWidth / 2;
+    std::unique_ptr<Menu> menu =
+        std::make_unique<Menu>(menuXpos, 200, itemWidth, itemHeight);
 
     auto settingsMenu = std::make_unique<MenuBox>("settings", nullptr);
-
     auto moveBack = std::make_unique<GoBackAction>(*menu);
+    auto EnemiesButton = nullptr;
+    auto volumeButton = nullptr;
+    settingsMenu->addItem("Enemies", std::move(volumeButton));
+    settingsMenu->addItem("Volume", std::move(EnemiesButton));
     settingsMenu->addItem("Back", std::move(moveBack));
-
     auto openSettings =
         std::make_unique<OpenSubMenuAction>(*menu, std::move(settingsMenu));
+
     auto startGame = std::make_unique<StartGameAction>(gameStarted);
+
     auto quitGame = std::make_unique<QuitAction>(quit);
 
     auto mainMenu = std::make_unique<MenuBox>("MainMenu", nullptr);
     mainMenu->addItem("Start", std::move(startGame));
     mainMenu->addItem("Settings", std::move(openSettings));
-
     mainMenu->addItem("Quit", std::move(quitGame));
 
     menu->pushMenu(*mainMenu);

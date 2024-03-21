@@ -77,6 +77,15 @@ void MenuBox::render() {
     }
 }
 
+void MenuBox::render(int x, int y, int w, int h) {
+    SDL_Point pos = {x, y};
+    for (auto &i : items) {
+        i->setRect(pos.x, pos.y, w, h);
+        i->render();
+
+        pos.y += h + padding;
+    }
+}
 bool MenuBox::handleMouse(int mouseX, int mouseY) {
     for (auto &i : items) {
         if (i->isMouseOver(mouseX, mouseY)) {
@@ -91,7 +100,7 @@ bool MenuBox::handleMouse(int mouseX, int mouseY) {
 void Menu::renderMenu() {
     if (!menuStack.empty()) {
         auto &currentMenu = menuStack.top();
-        currentMenu->render();
+        currentMenu->render(leftTop.x, leftTop.y, elementWidth, elementHeight);
     } else {
         std::cout << "No menu to render!" << std::endl;
     }

@@ -85,6 +85,8 @@ class Menu {
 
     void popMenu();
 
+    bool empty() { return menuStack.empty(); }
+
   private:
     // don't take ownership
     std::stack<MenuBox *> menuStack;

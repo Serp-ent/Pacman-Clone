@@ -60,6 +60,7 @@ int main() {
     int itemWidth = Game::screen_width / 2;
     int itemHeight = Game::screen_height / 8;
     int menuXpos = Game::screen_width / 2 - itemWidth / 2;
+
     std::unique_ptr<Menu> menu =
         std::make_unique<Menu>(menuXpos, 200, itemWidth, itemHeight);
 
@@ -75,14 +76,29 @@ int main() {
 
     auto startGame = std::make_unique<StartGameAction>(gameStarted);
 
+    auto listLevels = std::make_unique<ListLevelsInGrid>();
+
+    auto highScores = std::make_unique<ListHighScores>();
+
     auto quitGame = std::make_unique<QuitAction>(quit);
 
     auto mainMenu = std::make_unique<MenuBox>("MainMenu", nullptr);
     mainMenu->addItem("Start", std::move(startGame));
+    mainMenu->addItem("Levels", std::move(listLevels));
+    mainMenu->addItem("High Scores", std::move(highScores));
     mainMenu->addItem("Settings", std::move(openSettings));
     mainMenu->addItem("Quit", std::move(quitGame));
 
     menu->pushMenu(*mainMenu);
+
+    //***********************************************************************************
+
+    auto resumeGame = std::make_unique<StartGameAction>(isPaused);
+    auto quitGamePause = std::make_unique<QuitAction>(quit);
+
+    auto pauseMenu = std::make_unique<MenuBox>("PauseMenu", nullptr);
+    pauseMenu->addItem("resume", std::move(resumeGame));
+    pauseMenu->addItem("quit", std::move(quitGamePause));
 
     //***********************************************************************************
 
@@ -93,7 +109,15 @@ int main() {
             } else if (e.type == SDL_KEYDOWN) {
                 switch (e.key.keysym.sym) {
                 case SDLK_ESCAPE:
-                    isPaused = !isPaused;
+                    if (gameStarted) {
+                        isPaused = !isPaused;
+                        if (isPaused) {
+                            menu->pushMenu(*pauseMenu);
+                            // push pausedMenu
+                        } else {
+                            menu->popMenu();
+                        }
+                    }
                     break;
                 case SDLK_UP:
                 case SDLK_DOWN:
@@ -102,13 +126,21 @@ int main() {
                     pacman.start();
                     break;
                 }
-            } else if (!gameStarted && e.type == SDL_MOUSEBUTTONDOWN) {
+            } else if ((!gameStarted || isPaused) &&
+                       e.type == SDL_MOUSEBUTTONDOWN) {
                 int mouseX, mouseY;
                 SDL_GetMouseState(&mouseX, &mouseY);
                 if (menu->handleMouse(mouseX, mouseY)) {
-                    printf("Menu::start clicked\n");
+                    // BUG: when user presses resume game in paused state the
+                    // fps jumps
                     fpsTimer.start(); // TODO: fps timer should be in some
                                       // screen class
+                }
+
+                if (gameStarted && !isPaused) {
+                    while (!menu->empty()) {
+                        menu->popMenu();
+                    }
                 }
             }
 
@@ -128,7 +160,8 @@ int main() {
         }
 
         if (isPaused) {
-            hud.gamePaused();
+            menu->renderMenu();
+            SDL_RenderPresent(Game::gRenderer);
             ++frames;
             continue;
         }

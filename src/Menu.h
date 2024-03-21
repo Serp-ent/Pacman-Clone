@@ -46,11 +46,11 @@ class MenuItemLeaf : public MenuItem {
 
 class MenuBox : public MenuItem {
   public:
-    MenuBox(const std::string &label, std::unique_ptr<Action> a);
+    MenuBox(const std::string &label);
 
     void addItem(const std::string &name, std::unique_ptr<Action> action);
 
-    void addItem(std::unique_ptr<MenuItemLeaf> item);
+    void addItem(std::unique_ptr<MenuItem> item);
 
     void setPadding(int p);
 
@@ -58,6 +58,9 @@ class MenuBox : public MenuItem {
     void render(int x, int y, int w, int h);
 
     bool handleMouse(int mouseX, int mouseY);
+
+    // TODO: handle scroll
+    // bool handleMouse(int mouseX, int mouseY);
 
     std::vector<std::unique_ptr<MenuItem>> items;
 
@@ -67,6 +70,28 @@ class MenuBox : public MenuItem {
     int padding = 10;
     int itemWidth = 100; // FIXME: unused
     int itemHeight = 50; // FIXME: unused
+};
+
+// MenuBuilder class definition
+class MenuBuilder {
+  public:
+    MenuBuilder &addItem(const std::string &label,
+                         std::unique_ptr<Action> action) {
+        auto item = std::make_unique<MenuItem>(label, std::move(action));
+
+        box->addItem(std::move(item));
+
+        return *this;
+    }
+
+    std::unique_ptr<MenuBox> build() { return std::move(box); }
+
+    void reset(const std::string &label) {
+        box = std::make_unique<MenuBox>(label);
+    }
+
+  private:
+    std::unique_ptr<MenuBox> box;
 };
 
 //*******************************************************************************

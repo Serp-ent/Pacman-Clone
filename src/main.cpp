@@ -55,7 +55,6 @@ int main() {
     bool gameStarted = false;
 
     //***********************************************************************************
-    // TODO: builder pattern to building menu
 
     int itemWidth = Game::screen_width / 2;
     int itemHeight = Game::screen_height / 8;
@@ -64,30 +63,51 @@ int main() {
     std::unique_ptr<Menu> menu =
         std::make_unique<Menu>(menuXpos, 200, itemWidth, itemHeight);
 
-    auto settingsMenu = std::make_unique<MenuBox>("settings", nullptr);
+    auto startGame = std::make_unique<StartGameAction>(gameStarted);
+
+    MenuBuilder builder;
+
+    builder.reset("settings");
     auto moveBack = std::make_unique<GoBackAction>(*menu);
-    auto EnemiesButton = nullptr;
-    auto volumeButton = nullptr;
-    settingsMenu->addItem("Enemies", std::move(volumeButton));
-    settingsMenu->addItem("Volume", std::move(EnemiesButton));
-    settingsMenu->addItem("Back", std::move(moveBack));
+    builder.addItem("Enemies", nullptr)
+        .addItem("Volume", nullptr)
+        .addItem("back", std::move(moveBack));
+    auto settingsMenu = builder.build();
     auto openSettings =
         std::make_unique<OpenSubMenuAction>(*menu, std::move(settingsMenu));
 
-    auto startGame = std::make_unique<StartGameAction>(gameStarted);
+    builder.reset("List levels");
+    auto levelsGoBack = std::make_unique<GoBackAction>(*menu);
+    for (int i = 0; i < 4; ++i) {
+        std::string level = "level " + std::to_string(i);
+        builder.addItem(level, nullptr);
+    }
+    builder.addItem("back", std::move(levelsGoBack));
+    auto levelList = builder.build();
+    auto listLevels =
+        std::make_unique<OpenSubMenuAction>(*menu, std::move(levelList));
 
-    auto listLevels = std::make_unique<ListLevelsInGrid>();
+    builder.reset("High scores");
+    auto highScoresBack = std::make_unique<GoBackAction>(*menu);
 
-    auto highScores = std::make_unique<ListHighScores>();
+    builder.addItem("Marek: 200", nullptr)
+        .addItem("Agata: 150", nullptr)
+        .addItem("Szymon: 50", nullptr)
+        .addItem("back", std::move(highScoresBack));
+    auto listHighScores = builder.build();
+
+    auto highScoresList =
+        std::make_unique<OpenSubMenuAction>(*menu, std::move(listHighScores));
 
     auto quitGame = std::make_unique<QuitAction>(quit);
 
-    auto mainMenu = std::make_unique<MenuBox>("MainMenu", nullptr);
-    mainMenu->addItem("Start", std::move(startGame));
-    mainMenu->addItem("Levels", std::move(listLevels));
-    mainMenu->addItem("High Scores", std::move(highScores));
-    mainMenu->addItem("Settings", std::move(openSettings));
-    mainMenu->addItem("Quit", std::move(quitGame));
+    builder.reset("Main Men");
+    builder.addItem("Start", std::move(startGame))
+        .addItem("Levels", std::move(listLevels))
+        .addItem("High Scores", std::move(highScoresList))
+        .addItem("Settings", std::move(openSettings))
+        .addItem("Quit", std::move(quitGame));
+    auto mainMenu = builder.build();
 
     menu->pushMenu(*mainMenu);
 
@@ -96,9 +116,10 @@ int main() {
     auto resumeGame = std::make_unique<StartGameAction>(isPaused);
     auto quitGamePause = std::make_unique<QuitAction>(quit);
 
-    auto pauseMenu = std::make_unique<MenuBox>("PauseMenu", nullptr);
-    pauseMenu->addItem("resume", std::move(resumeGame));
-    pauseMenu->addItem("quit", std::move(quitGamePause));
+    builder.reset("Pause Menu");
+    builder.addItem("resume", std::move(resumeGame))
+        .addItem("quit", std::move(quitGamePause));
+    auto pauseMenu = builder.build();
 
     //***********************************************************************************
 

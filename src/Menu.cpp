@@ -43,8 +43,7 @@ MenuItemLeaf::MenuItemLeaf(const std::string &t, int x, int y, int w, int h,
 
 void MenuItemLeaf::invokeAction() { action->execute(); }
 
-MenuBox::MenuBox(const std::string &label, std::unique_ptr<Action> a)
-    : MenuItem(label, std::move(a)) {}
+MenuBox::MenuBox(const std::string &label) : MenuItem(label, nullptr) {}
 
 void MenuBox::addItem(const std::string &name, std::unique_ptr<Action> action) {
     int startX = topleft.x;
@@ -55,7 +54,7 @@ void MenuBox::addItem(const std::string &name, std::unique_ptr<Action> action) {
     items.push_back(std::move(item));
 }
 
-void MenuBox::addItem(std::unique_ptr<MenuItemLeaf> item) {
+void MenuBox::addItem(std::unique_ptr<MenuItem> item) {
     // TODO: function calculate start pos for new element
     int startX = topleft.x;
     int startY = topleft.y + items.size() * (itemHeight + padding);

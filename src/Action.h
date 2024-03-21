@@ -20,6 +20,7 @@ class Action {
 
 class ListHighScores : public Action {
   public:
+    ListHighScores();
     virtual void execute() override {
         for (int i = 0; i < exampleData.size(); ++i) {
             printf("[%d] %s\n", i, exampleData[i].c_str());

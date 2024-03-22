@@ -17,11 +17,22 @@ class Game {
     static constexpr int screen_width = 1280;
     static constexpr int screen_height = 960;
 
+    enum class State : uint8_t {
+        menu,
+        notStarted,
+        running,
+        paused,
+        end,
+        quit,
+    };
+
     Game();
 
     void load_media();
 
     void close_game();
+
+    void run();
 
     ~Game() { close_game(); }
 
@@ -29,12 +40,15 @@ class Game {
     int get_points() const { return points; }
     int &get_points_ref() { return points; }
 
-    bool isEnd() const { return end; }
-    void setEnd(bool isEnd = true) { end = isEnd; }
+    State getState() { return state; }
+    void setState(State s) { state = s; }
 
   private:
     int points = 0;
-    bool end = false;
+    int frames = 0;
+
+    // TODO: these 3 should be in one enum class
+    State state;
 
     // points
     // map

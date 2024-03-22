@@ -1,8 +1,12 @@
 #include "Game.h"
 
+#include "Action.h"
 #include "Board.h"
 #include "Ghost.h"
+#include "Hud.h"
+#include "Menu.h"
 #include "SDL2/SDL_image.h"
+#include "TextTexture.h"
 
 // TODO: check if we can have unique_ptr provided method
 // that closes in dtor
@@ -128,4 +132,214 @@ void Game::close_game() {
     SDL_Quit();
 
     std::printf("Cleaning up game\n");
+}
+
+void Game::run() {
+    SDL_Event e;
+    Board board("./levels/level1.txt");
+
+    Pacman pacman(get_points_ref(), board.getPacmanStart().x,
+                  board.getPacmanStart().y);
+    Ghost ghost(board.getGhostStart().x, board.getGhostStart().y);
+
+    TextTexture theEndText;
+    theEndText.loadText("Game over", black);
+
+    Hud hud;
+    Timer fpsTimer;
+
+    //***********************************************************************************
+
+    int itemWidth = Game::screen_width / 2;
+    int itemHeight = Game::screen_height / 8;
+    int menuXpos = Game::screen_width / 2 - itemWidth / 2;
+
+    std::unique_ptr<Menu> menu =
+        std::make_unique<Menu>(menuXpos, 200, itemWidth, itemHeight);
+
+    auto startGame = std::make_unique<SetGameState>(*this, State::running);
+
+    MenuBuilder builder;
+
+    builder.reset("settings");
+    auto moveBack = std::make_unique<GoBackAction>(*menu);
+    builder.addItem("Enemies", nullptr)
+        .addItem("Volume", nullptr)
+        .addItem("back", std::move(moveBack));
+    auto settingsMenu = builder.build();
+    auto openSettings =
+        std::make_unique<OpenSubMenuAction>(*menu, std::move(settingsMenu));
+
+    builder.reset("List levels");
+    auto levelsGoBack = std::make_unique<GoBackAction>(*menu);
+    for (int i = 0; i < 4; ++i) {
+        std::string level = "level " + std::to_string(i);
+        builder.addItem(level, nullptr);
+    }
+    builder.addItem("back", std::move(levelsGoBack));
+    auto levelList = builder.build();
+    auto listLevels =
+        std::make_unique<OpenSubMenuAction>(*menu, std::move(levelList));
+
+    builder.reset("High scores");
+    auto highScoresBack = std::make_unique<GoBackAction>(*menu);
+
+    builder.addItem("Marek: 200", nullptr)
+        .addItem("Agata: 150", nullptr)
+        .addItem("Szymon: 50", nullptr)
+        .addItem("back", std::move(highScoresBack));
+    auto listHighScores = builder.build();
+
+    auto highScoresList =
+        std::make_unique<OpenSubMenuAction>(*menu, std::move(listHighScores));
+
+    auto quitGame = std::make_unique<SetGameState>(*this, State::quit);
+
+    builder.reset("Main Men");
+    builder.addItem("Start", std::move(startGame))
+        .addItem("Levels", std::move(listLevels))
+        .addItem("High Scores", std::move(highScoresList))
+        .addItem("Settings", std::move(openSettings))
+        .addItem("Quit", std::move(quitGame));
+    auto mainMenu = builder.build();
+
+    menu->pushMenu(*mainMenu);
+
+    //***********************************************************************************
+
+    auto resumeGame = std::make_unique<SetGameState>(*this, State::running);
+    auto quitGamePause = std::make_unique<SetGameState>(*this, State::quit);
+
+    builder.reset("Pause Menu");
+    builder.addItem("resume", std::move(resumeGame))
+        .addItem("quit", std::move(quitGamePause));
+    auto pauseMenu = builder.build();
+
+    //***********************************************************************************
+
+    while (state != State::quit) {
+        while (SDL_PollEvent(&e)) {
+            if (e.type == SDL_QUIT) {
+                state = State::quit;
+
+            } else if (e.type == SDL_KEYDOWN) {
+                switch (e.key.keysym.sym) {
+                case SDLK_ESCAPE:
+                    if (state == State::running) {
+                        state = State::paused;
+                        menu->pushMenu(*pauseMenu);
+                    } else if (state == State::paused) {
+                        state = State::running;
+                        menu->popMenu();
+                    } else if (state == State::menu) {
+                        if (menu->size() > 1) {
+                            menu->popMenu();
+                        }
+                    } else {
+                        printf("[ERROR]: unknown state on ESC click\n");
+                    }
+                    break;
+                case SDLK_UP:
+                case SDLK_DOWN:
+                case SDLK_RIGHT:
+                case SDLK_LEFT:
+                    pacman.start();
+                    break;
+                }
+            } else if (state != State::running &&
+                       e.type == SDL_MOUSEBUTTONDOWN) {
+                int mouseX, mouseY;
+                SDL_GetMouseState(&mouseX, &mouseY);
+                menu->handleMouse(mouseX, mouseY);
+            }
+
+            if (!pacman.playsDeathAnimation()) {
+                pacman.handleEvent(e);
+            }
+        }
+
+        SDL_SetRenderDrawColor(Game::gRenderer, 0, 0, 0, 0xFF);
+        SDL_RenderClear(Game::gRenderer);
+
+        if (state == State::menu) {
+            menu->renderMenu();
+            SDL_RenderPresent(Game::gRenderer);
+
+            continue;
+        }
+
+        if (state == State::paused) {
+            menu->renderMenu();
+            SDL_RenderPresent(Game::gRenderer);
+            ++frames;
+            continue;
+        }
+
+        if (state == State::end) {
+            SDL_SetRenderDrawColor(Game::gRenderer, 0, 0, 0, 0xFF);
+            SDL_RenderClear(Game::gRenderer);
+            theEndText.render(
+                Game::screen_width / 2 - theEndText.getWidth() / 2,
+                Game::screen_height / 2 - theEndText.getHeight() / 2);
+
+            SDL_RenderPresent(Game::gRenderer);
+            continue;
+        }
+
+        float avgFPS = frames / (fpsTimer.getTicks() / 1000.f);
+        if (avgFPS > 2'000'000) {
+            avgFPS = 0;
+        }
+
+        hud.setPoints(get_points());
+        hud.setFps(static_cast<int>(avgFPS));
+        hud.setLivesLeft(pacman.getLifesLeft());
+
+        // clear screen
+        SDL_SetRenderDrawColor(Game::gRenderer, 0, 0, 0, 0xFF);
+        SDL_RenderClear(Game::gRenderer);
+
+        // TODO: create some graphic class
+        hud.render();
+
+        board.render();
+
+        pacman.render();
+        ghost.render();
+
+        // update screen
+        SDL_RenderPresent(Game::gRenderer);
+        ++frames;
+
+        if (!pacman.isStarted()) {
+            continue;
+        }
+
+        if (pacman.wasKilled()) {
+            if (pacman.playsDeathAnimation()) {
+                continue;
+            }
+
+            pacman.setLifesLeft(pacman.getLifesLeft() - 1);
+
+            if (pacman.getLifesLeft() == 0) {
+                state = State::end;
+                continue;
+            }
+            // TODO: set position (the map/level should know where pacman
+            // and ghost start position is)
+            int lives = pacman.getLifesLeft();
+            pacman.setPos(board.getPacmanStart());
+            pacman.setLifesLeft(lives);
+
+            ghost.setPos(board.getGhostStart());
+
+            pacman.stop();
+        } else if (get_points() == board.getTotalPoints()) {
+            state = State::end;
+        } else {
+            pacman.move(board, ghost);
+            ghost.move(board, pacman);
+        }
+    }
 }

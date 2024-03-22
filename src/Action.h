@@ -1,6 +1,7 @@
 #ifndef GAME_ACTION_H
 #define GAME_ACTION_H
 
+#include "Game.h"
 #include "Menu.h"
 #include <cstring>
 #include <dirent.h>
@@ -72,14 +73,16 @@ class QuitAction : public Action {
     bool &end;
 };
 
-class StartGameAction : public Action {
+class SetGameState : public Action {
   public:
-    StartGameAction(bool &flag) : gameStarted{flag} {}
+    SetGameState(Game &g, Game::State s) : game{g}, destState(s) {}
 
-    void execute() override { gameStarted = !gameStarted; }
+    void execute() override { game.setState(destState); }
 
   private:
-    bool &gameStarted;
+    // Arguments for execute
+    Game &game;
+    Game::State destState;
 };
 
 class GoBackAction : public Action {

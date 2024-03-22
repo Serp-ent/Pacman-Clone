@@ -43,9 +43,17 @@ class Game {
     State getState() { return state; }
     void setState(State s) { state = s; }
 
-    void resetFPS() {
+    void resetFps() {
         frames = 0;
         fpsTimer.start();
+    }
+
+    int getAvgFps() {
+        float avgFPS = frames / (fpsTimer.getTicks() / 1000.f);
+        if (avgFPS > 2'000'000) {
+            avgFPS = 0;
+        }
+        return static_cast<int>(avgFPS);
     }
 
   private:

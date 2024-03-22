@@ -80,7 +80,7 @@ class SetGameState : public Action {
     void execute() override {
         game.setState(destState);
         if (game.getState() == Game::State::running) {
-            game.resetFPS();
+            game.resetFps();
         }
     }
 

@@ -143,7 +143,7 @@ void Game::run() {
     Ghost ghost(board.getGhostStart().x, board.getGhostStart().y);
 
     TextTexture theEndText;
-    theEndText.loadText("Game over", black);
+    theEndText.loadText("Game over", white);
 
     Hud hud;
 
@@ -216,6 +216,8 @@ void Game::run() {
 
     //***********************************************************************************
 
+    // BUG: there is something wrong with path when ghost kills pacman
+    // TODO: reset all entities to default state when pacman is killed
     while (state != State::quit) {
         while (SDL_PollEvent(&e)) {
             if (e.type == SDL_QUIT) {
@@ -245,7 +247,7 @@ void Game::run() {
                     pacman.start();
                     break;
                 }
-            } else if (state != State::running &&
+            } else if ((state == State::menu || state == State::paused) &&
                        e.type == SDL_MOUSEBUTTONDOWN) {
                 int mouseX, mouseY;
                 SDL_GetMouseState(&mouseX, &mouseY);
@@ -285,13 +287,8 @@ void Game::run() {
             continue;
         }
 
-        float avgFPS = frames / (fpsTimer.getTicks() / 1000.f);
-        if (avgFPS > 2'000'000) {
-            avgFPS = 0;
-        }
-
         hud.setPoints(get_points());
-        hud.setFps(static_cast<int>(avgFPS));
+        hud.setFps(getAvgFps());
         hud.setLivesLeft(pacman.getLifesLeft());
 
         // clear screen

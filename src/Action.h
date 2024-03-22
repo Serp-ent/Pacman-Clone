@@ -77,7 +77,12 @@ class SetGameState : public Action {
   public:
     SetGameState(Game &g, Game::State s) : game{g}, destState(s) {}
 
-    void execute() override { game.setState(destState); }
+    void execute() override {
+        game.setState(destState);
+        if (game.getState() == Game::State::running) {
+            game.resetFPS();
+        }
+    }
 
   private:
     // Arguments for execute

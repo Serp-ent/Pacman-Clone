@@ -146,7 +146,6 @@ void Game::run() {
     theEndText.loadText("Game over", black);
 
     Hud hud;
-    Timer fpsTimer;
 
     //***********************************************************************************
 

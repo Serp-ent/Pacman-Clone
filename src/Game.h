@@ -43,9 +43,15 @@ class Game {
     State getState() { return state; }
     void setState(State s) { state = s; }
 
+    void resetFPS() {
+        frames = 0;
+        fpsTimer.start();
+    }
+
   private:
     int points = 0;
     int frames = 0;
+    Timer fpsTimer;
 
     // TODO: these 3 should be in one enum class
     State state;

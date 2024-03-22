@@ -138,6 +138,10 @@ int main() {
                         } else {
                             menu->popMenu();
                         }
+                    } else {
+                        if (menu->size() > 1) {
+                            menu->popMenu();
+                        }
                     }
                     break;
                 case SDLK_UP:

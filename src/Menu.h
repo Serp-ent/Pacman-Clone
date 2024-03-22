@@ -111,6 +111,7 @@ class Menu {
     void popMenu();
 
     bool empty() { return menuStack.empty(); }
+    int size() { return menuStack.size(); }
 
   private:
     // don't take ownership

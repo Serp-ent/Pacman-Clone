@@ -88,10 +88,17 @@ void Game::load_media() {
     }
 
     pos = SDL_Point{1, 4 * 16 + 1};
-    for (int i = 0; i < Ghost::frames; ++i) {
-        Ghost::spriteClips[i] = {pos.x, pos.y, 16, 16};
-        pos.x += 16;
+    for (int ghost = 0; ghost < Ghost::Type::ghostNumber; ++ghost) {
+        for (int i = 0; i < Ghost::frames; ++i) {
+            Ghost::spriteClips[ghost][i] = {pos.x, pos.y, 16, 16};
+            pos.x += 16;
+        }
+
+        pos.y += 16;
+        pos.x = 1;
     }
+
+    pos = SDL_Point{1 + 16 * Ghost::frames, 4 * 16 + 1};
     for (int i = 0; i < Ghost::runningAwayFrames; ++i) {
         Ghost::runningAwayClips[i] = {pos.x, pos.y, 16, 16};
         pos.x += 16;
@@ -139,7 +146,7 @@ void Game::run() {
     Board board("./levels/level1.txt");
 
     Pacman pacman(get_points_ref(), board.getPacmanStart());
-    Ghost ghost(board.getGhostStart());
+    Ghost ghost(Ghost::Type::red, board.getGhostStart());
 
     TextTexture theEndText;
     theEndText.loadText("Game over", white);

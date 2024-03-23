@@ -3,9 +3,10 @@
 #include "Behaviors.h"
 #include "Board.h"
 #include <SDL2/SDL_render.h>
+#include <array>
 #include <cstdio>
 
-SDL_Rect Ghost::spriteClips[Ghost::frames];
+std::array<Ghost::GhostClips, Ghost::Type::ghostNumber> Ghost::spriteClips;
 SDL_Rect Ghost::runningAwayClips[Ghost::runningAwayFrames];
 
 void Ghost::move(Board &b, Entity &pacman) { behavior->move(b, pacman); }
@@ -37,7 +38,7 @@ void Ghost::render() {
             frame = 0;
         }
 
-        currRect = &Ghost::spriteClips[directionSprite + frame / 5];
+        currRect = &Ghost::spriteClips[ghostColor][directionSprite + frame / 5];
     } else {
         if (isBlinking()) {
             if (frame / 8 >= Ghost::runningAwayFrames) {
@@ -89,4 +90,30 @@ void Ghost::clearState(bool death) {
     //         behavior.reset(new RedGhostBehavior{*this});
     //     }
     // }
+}
+
+std::unique_ptr<Behavior> Ghost::getGhostBehavior(Ghost &ghost) {
+    std::unique_ptr<Behavior> behavior;
+    switch (ghost.ghostColor) {
+    case Type::red:
+        behavior = std::make_unique<RedGhostBehavior>(ghost);
+        break;
+    case Type::pink:
+        printf("[ERROR] pink Ghots not implemented\n");
+        behavior = std::make_unique<RedGhostBehavior>(ghost);
+        break;
+    case Type::cyan:
+        printf("[ERROR] cyan Ghots not implemented\n");
+        behavior = std::make_unique<RedGhostBehavior>(ghost);
+        break;
+    case Type::orange:
+        printf("[ERROR] orange Ghots not implemented\n");
+        behavior = std::make_unique<RedGhostBehavior>(ghost);
+        break;
+    case Type::ghostNumber:
+        printf("[ERROR] ghost number provided as argument\n");
+        break;
+    }
+
+    return behavior;
 }

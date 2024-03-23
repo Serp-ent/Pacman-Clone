@@ -4,6 +4,9 @@
 #include "Behaviors.h"
 #include "Entity.h"
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_rect.h>
+#include <array>
+#include <memory>
 
 class Pacman;
 class Board;
@@ -11,20 +14,35 @@ class Board;
 class Ghost : public Entity {
   public:
     // TODO: clips should be in one array accessed by macros for each state
+    enum Type {
+        red,    // Blinky
+        pink,   // Pinky
+        cyan,   // Inky
+        orange, // Clyde
+        ghostNumber,
+    };
+
     static constexpr int frames = 8;
-    static SDL_Rect spriteClips[frames];
     static constexpr int runningAwayFrames = 4;
+
+    using GhostClips = std::array<SDL_Rect, frames>;
+
+    static std::array<GhostClips, Type::ghostNumber> spriteClips;
+
     static SDL_Rect runningAwayClips[runningAwayFrames];
 
-    Ghost() {
-        currRect = &spriteClips[directionSprite];
+    Ghost(Type t) : ghostColor(t) {
+        currRect = &spriteClips[ghostColor][directionSprite];
         attacker = true;
-        behavior.reset(new RedGhostBehavior(*this));
+
+        behavior = getGhostBehavior(*this);
     }
-    Ghost(const SDL_Point &pos) : Ghost{} {
+    Ghost(Type t, const SDL_Point &pos) : Ghost{t} {
         texture.x = pos.x;
         texture.y = pos.y;
     }
+
+    static std::unique_ptr<Behavior> getGhostBehavior(Ghost &ghost);
 
     virtual void move(Board &b, Entity &e) override;
     virtual void render() override;
@@ -61,6 +79,7 @@ class Ghost : public Entity {
     // TODO: add sprite
     int directionSprite = 0;
     bool blink = false;
+    const Type ghostColor;
 };
 
 #endif // !PACMAN_GHOST_H

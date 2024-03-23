@@ -109,7 +109,9 @@ void PacmanSuperPointBehavior::move(Board &b, Entity &ghost) {
         } else {
             pacman.attackerTime.stop();
             g.setBlinking(false);
-            ghost.setAttack();
+            if (!ghost.wasKilled()) { // check if ghost was returning to base
+                ghost.setAttack();
+            }
             pacman.setAttack(false);
         }
     }

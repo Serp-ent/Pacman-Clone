@@ -40,6 +40,14 @@ class Ghost : public Entity {
     virtual void clearState(bool death = false) override;
     virtual void setAttack(bool attack = true) override;
 
+    virtual void reset(const SDL_Point &newPos) override {
+        clearState();
+        velocity_x = velocity_y = 0;
+        setPos(newPos);
+
+        setAttack(true);
+    }
+
   private:
     friend class DumbGhostBehavior;
     friend class GhostDeathBehavior;

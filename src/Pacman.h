@@ -51,6 +51,18 @@ class Pacman : public Entity {
         }
     }
 
+    virtual void reset(const SDL_Point &newPos) override {
+        attackerTime.stop();
+        playsAnimation = false;
+        started = false;
+
+        setAttack(false);
+        setPos(newPos);
+        clearState();
+
+        velocity_x = velocity_y = 0;
+    }
+
     // start means user presses key to start moving pacman
     void start() { started = true; }
     // stop means wait for user keypress

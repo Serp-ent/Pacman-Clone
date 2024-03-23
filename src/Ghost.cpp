@@ -57,6 +57,8 @@ void Ghost::setAttack(bool attack) {
         RedGhostBehavior *b = dynamic_cast<RedGhostBehavior *>(behavior.get());
         if (!b) {
             behavior.reset(new RedGhostBehavior{*this});
+        } else {
+            b->resetPath();
         }
     } else {
         GhostRunAwayBehavior *b =

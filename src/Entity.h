@@ -12,6 +12,7 @@ class Entity {
     static constexpr int height = 30;
     static constexpr int width = 30;
     // default velocity
+    // TODO: change name to speed
     static constexpr int velocity = 2;
 
     virtual ~Entity() {}
@@ -36,7 +37,10 @@ class Entity {
 
     bool getAttack() const { return attacker; }
 
+    virtual void reset(const SDL_Point &newPos) = 0;
+
   protected:
+    // TODO: Rename to collision
     SDL_Rect texture{0, 0, width, height};
     SDL_Rect *currRect = nullptr;
     std::unique_ptr<Behavior> behavior;

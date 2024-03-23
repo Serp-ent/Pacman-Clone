@@ -322,15 +322,11 @@ void Game::run() {
                 state = State::end;
                 continue;
             }
-            // TODO: set position (the map/level should know where pacman
-            // and ghost start position is)
             int lives = pacman.getLifesLeft();
-            pacman.setPos(board.getPacmanStart());
             pacman.setLifesLeft(lives);
 
-            ghost.setPos(board.getGhostStart());
-
-            pacman.stop();
+            pacman.reset(board.getPacmanStart());
+            ghost.reset(board.getGhostStart());
         } else if (get_points() == board.getTotalPoints()) {
             state = State::end;
         } else {

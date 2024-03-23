@@ -27,11 +27,6 @@ void PacmanDefaultBehavior::move(Board &b, Entity &ghost) {
     SDL_Point texture_center = {pacman.texture.x + Pacman::width / 2,
                                 pacman.texture.y + Pacman::height / 2};
 
-    if (pacman.attackerTime.getTicks() > 50'000) {
-        pacman.attackerTime.stop();
-        // ghost.setAttack();
-    }
-
     int i = (texture_center.x - b.getPos().x) / Box::size;
     int j = (texture_center.y - b.getPos().y) / Box::size;
     if (pacman.velocity_x) {
@@ -106,10 +101,17 @@ void PacmanSuperPointBehavior::move(Board &b, Entity &ghost) {
     SDL_Point texture_center = {pacman.texture.x + Pacman::width / 2,
                                 pacman.texture.y + Pacman::height / 2};
 
-    if (pacman.attackerTime.getTicks() > 50'000) {
-        pacman.attackerTime.stop();
-        ghost.setAttack();
-        pacman.setAttack(false);
+    if (pacman.attackerTime.getTicks() > 4'000) {
+        Ghost &g = dynamic_cast<Ghost &>(ghost);
+        if (pacman.attackerTime.getTicks() < 5'000) {
+            g.setBlinking();
+            // start blinking
+        } else {
+            pacman.attackerTime.stop();
+            g.setBlinking(false);
+            ghost.setAttack();
+            pacman.setAttack(false);
+        }
     }
 
     int i = (texture_center.x - b.getPos().x) / Box::size;

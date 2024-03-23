@@ -13,7 +13,7 @@ class Ghost : public Entity {
     // TODO: clips should be in one array accessed by macros for each state
     static constexpr int frames = 8;
     static SDL_Rect spriteClips[frames];
-    static constexpr int runningAwayFrames = 2;
+    static constexpr int runningAwayFrames = 4;
     static SDL_Rect runningAwayClips[runningAwayFrames];
 
     Ghost() {
@@ -46,7 +46,11 @@ class Ghost : public Entity {
         setPos(newPos);
 
         setAttack(true);
+        blink = false;
     }
+
+    void setBlinking(bool b = true) { blink = b; }
+    bool isBlinking() { return blink; }
 
   private:
     friend class DumbGhostBehavior;
@@ -56,6 +60,7 @@ class Ghost : public Entity {
 
     // TODO: add sprite
     int directionSprite = 0;
+    bool blink = false;
 };
 
 #endif // !PACMAN_GHOST_H

@@ -39,8 +39,14 @@ void Ghost::render() {
 
         currRect = &Ghost::spriteClips[directionSprite + frame / 5];
     } else {
-        if (frame / 8 >= Ghost::runningAwayFrames) {
-            frame = 0;
+        if (isBlinking()) {
+            if (frame / 8 >= Ghost::runningAwayFrames) {
+                frame = 0;
+            }
+        } else {
+            if (frame / 8 >= (Ghost::runningAwayFrames / 2)) {
+                frame = 0;
+            }
         }
         currRect = &Ghost::runningAwayClips[frame / 8];
     }

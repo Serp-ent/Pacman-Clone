@@ -486,8 +486,51 @@ void RedGhostBehavior::move(Board &b, Entity &pacman) {
     }
 }
 
+int getRandomNumber(int min, int max) {
+    // Create a random device to seed the random number generator
+    std::random_device rd;
+
+    // Create a random number generator
+    std::mt19937 gen(rd());
+
+    // Create a distribution to define the range of random numbers
+    std::uniform_int_distribution<int> dis(min, max - 1);
+
+    // Generate and return a random number
+    return dis(gen);
+}
+
+Graph::BoxNode *pickRandomCorridor(std::vector<Graph::BoxNode *> &path,
+                                   Graph::BoxNode *dest) {
+    std::vector<Graph::BoxNode *> filtered;
+    for (Graph::BoxNode *v : path.back()->neighbors) {
+        if (v == dest || v == path.at(path.size() - 2)) {
+            continue;
+        }
+
+        filtered.push_back(v);
+    }
+
+    if (!filtered.empty()) {
+        return filtered.at(getRandomNumber(0, filtered.size()));
+    } else {
+        return nullptr;
+    }
+
+    // BUG: when ghost reaches dead end he should move backward and try
+    // different route currently we have segmentation fault
+    // // reached dead end
+    // auto start = path.rbegin();
+    // while ((*start)->neighbors.size() < 3) {
+    //     filtered.push_back(*start);
+
+    //     ++start;
+    // }
+    // path = filtered;
+    // return path.back();
+}
+
 void GhostRunAwayBehavior::move(Board &b, Entity &pacman) {
-    // TODO: ghost should move smoothly
     struct BoxPos {
         int x, y;
     };
@@ -509,18 +552,13 @@ void GhostRunAwayBehavior::move(Board &b, Entity &pacman) {
 
     Graph::BoxNode *dest = path.back();
     if (dest->x == ghostPos.x && dest->y == ghostPos.y) {
-        for (Graph::BoxNode *v : path.back()->neighbors) {
-            if (v == dest || v == path.at(path.size() - 2)) {
-                continue;
-            }
 
-            // TODO: pick random from neighbours to avoid looping
-
-            dest = v;
-            break;
-        }
         // TODO: pop front from path or check if we have shortert path while
         // running away to prevent going straight to pacman
+        dest = pickRandomCorridor(path, dest);
+        if (dest == nullptr) {
+            dest = path.at(path.size() - 2);
+        }
         path.push_back(dest);
     }
 

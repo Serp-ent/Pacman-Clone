@@ -35,71 +35,62 @@ class PacmanSuperPointBehavior : public Behavior {
     Pacman &pacman;
 };
 
-class RedGhostBehavior : public Behavior {
+//*********************************************************************************
+
+class GhostAttackBehavior : public Behavior {
   public:
-    RedGhostBehavior(Ghost &g) : ghost(g) {}
-    virtual void move(Board &b, Entity &e) override;
+    GhostAttackBehavior(Ghost &g) : ghost{g} {}
+    virtual ~GhostAttackBehavior(){};
 
     void resetPath() { path.clear(); }
-    const std::vector<Graph::BoxNode *> &getPath() { return path; }
+    std::vector<Graph::BoxNode *> &getPath() { return path; }
 
-  private:
+  protected:
     Ghost &ghost;
     std::vector<Graph::BoxNode *> path;
 };
 
-class PinkGhostBehavior : public Behavior {
+class RedGhostBehavior : public GhostAttackBehavior {
   public:
-    PinkGhostBehavior(Ghost &g) : ghost(g) {}
+    RedGhostBehavior(Ghost &g) : GhostAttackBehavior{g} {}
     virtual void move(Board &b, Entity &e) override;
-
-    void resetPath() { path.clear(); }
-
-  private:
-    Ghost &ghost;
-    std::vector<Graph::BoxNode *> path;
 };
 
-class OrangeGhostBehavior : public Behavior {
+class PinkGhostBehavior : public GhostAttackBehavior {
   public:
-    OrangeGhostBehavior(Ghost &g) : ghost(g) {}
+    PinkGhostBehavior(Ghost &g) : GhostAttackBehavior{g} {}
     virtual void move(Board &b, Entity &e) override;
-
-    void resetPath() { path.clear(); }
-
-  private:
-    Ghost &ghost;
-    std::vector<Graph::BoxNode *> path;
 };
 
-class CyanGhostBehavior : public Behavior {
+class OrangeGhostBehavior : public GhostAttackBehavior {
   public:
-    CyanGhostBehavior(Ghost &g) : ghost(g) {}
+    OrangeGhostBehavior(Ghost &g) : GhostAttackBehavior{g} {}
     virtual void move(Board &b, Entity &e) override;
+};
 
-    void resetPath() { path.clear(); }
-
-  private:
-    Ghost &ghost;
-    std::vector<Graph::BoxNode *> path;
+class CyanGhostBehavior : public GhostAttackBehavior {
+  public:
+    CyanGhostBehavior(Ghost &g) : GhostAttackBehavior{g} {}
+    virtual void move(Board &b, Entity &e) override;
 };
 
 // INFO: testing purpose only moves in random direction
-class DumbGhostBehavior : public Behavior {
+class DumbGhostBehavior : public GhostAttackBehavior {
   public:
-    DumbGhostBehavior(Ghost &g) : ghost(g) {}
+    DumbGhostBehavior(Ghost &g) : GhostAttackBehavior{g} {}
 
     virtual void move(Board &b, Entity &e) override;
-
-  private:
-    Ghost &ghost;
 };
+
+//*********************************************************************************
 
 // INFO: all ghost behave the same when running away from pacman
 class GhostRunAwayBehavior : public Behavior {
   public:
     GhostRunAwayBehavior(Ghost &g) : ghost{g} {}
     virtual void move(Board &b, Entity &e) override;
+
+    std::vector<Graph::BoxNode *> &getPath() { return path; }
 
   private:
     Ghost &ghost;
@@ -113,6 +104,7 @@ class GhostDeathBehavior : public Behavior {
     void loadPathToHome(Board &b);
 
     virtual void move(Board &b, Entity &e) override;
+    std::vector<Graph::BoxNode *> &getPath() { return path; }
 
   private:
     Ghost &ghost;

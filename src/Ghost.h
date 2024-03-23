@@ -53,7 +53,7 @@ class Ghost : public Entity {
     virtual void move(Board &b, Entity &e) override;
     virtual void render() override;
 
-    void renderPath(const SDL_Point& boardStart);
+    void renderPath(const SDL_Point &boardStart);
 
     void die(Board &b) {
         Entity::clearState(true);

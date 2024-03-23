@@ -13,19 +13,58 @@ SDL_Rect Ghost::runningAwayClips[Ghost::runningAwayFrames];
 void Ghost::move(Board &b, Entity &pacman) { behavior->move(b, pacman); }
 
 void Ghost::renderPath(const SDL_Point &boardPos) {
-    RedGhostBehavior *b = dynamic_cast<RedGhostBehavior *>(behavior.get());
-    if (!b) {
-        return;
+    {
+        GhostAttackBehavior *b =
+            dynamic_cast<GhostAttackBehavior *>(behavior.get());
+        if (b) {
+            SDL_SetRenderDrawColor(Game::gRenderer, 255, 0, 0, 0xFF);
+            for (auto p : b->getPath()) {
+                // TODO: function that changes from Box cordinates to pixels
+                // and from pixels to box coordinates
+                SDL_Rect path{
+                    boardPos.x + p->x * Box::size + Box::size / 2 - 5 / 2,
+                    boardPos.y + p->y * Box::size + Box::size / 2 - 5 / 2, 5,
+                    5};
+                SDL_RenderFillRect(Game::gRenderer, &path);
+            }
+            return;
+        }
     }
 
-    SDL_SetRenderDrawColor(Game::gRenderer, 255, 0, 0, 0xFF);
-    for (auto p : b->getPath()) {
-        // TODO: function that changes from Box cordinates to pixels
-        // and from pixels to box coordinates
-        SDL_Rect path{boardPos.x + p->x * Box::size + Box::size / 2 - 5 / 2,
-                      boardPos.y + p->y * Box::size + Box::size / 2 - 5 / 2, 5,
-                      5};
-        SDL_RenderFillRect(Game::gRenderer, &path);
+    {
+        GhostRunAwayBehavior *b =
+            dynamic_cast<GhostRunAwayBehavior *>(behavior.get());
+        if (b) {
+            SDL_SetRenderDrawColor(Game::gRenderer, 0, 0, 0xFF, 0xFF);
+            for (auto p : b->getPath()) {
+                // TODO: function that changes from Box cordinates to pixels
+                // and from pixels to box coordinates
+                SDL_Rect path{
+                    boardPos.x + p->x * Box::size + Box::size / 2 - 5 / 2,
+                    boardPos.y + p->y * Box::size + Box::size / 2 - 5 / 2, 5,
+                    5};
+                SDL_RenderFillRect(Game::gRenderer, &path);
+            }
+            return;
+        }
+    }
+
+    {
+        GhostDeathBehavior *b =
+            dynamic_cast<GhostDeathBehavior *>(behavior.get());
+        if (b) {
+            SDL_SetRenderDrawColor(Game::gRenderer, 255, 255, 255, 0xFF);
+            for (auto p : b->getPath()) {
+                // TODO: function that changes from Box cordinates to pixels
+                // and from pixels to box coordinates
+                SDL_Rect path{
+                    boardPos.x + p->x * Box::size + Box::size / 2 - 5 / 2,
+                    boardPos.y + p->y * Box::size + Box::size / 2 - 5 / 2, 5,
+                    5};
+                SDL_RenderFillRect(Game::gRenderer, &path);
+            }
+            return;
+        }
     }
 }
 
@@ -81,7 +120,8 @@ void Ghost::setAttack(bool attack) {
     // cast to prevent many memory allocations
     // TODO: find better way
     if (attacker) {
-        RedGhostBehavior *b = dynamic_cast<RedGhostBehavior *>(behavior.get());
+        GhostAttackBehavior *b =
+            dynamic_cast<GhostAttackBehavior *>(behavior.get());
         if (!b) {
             behavior.reset(new RedGhostBehavior{*this});
         } else {

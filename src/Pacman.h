@@ -34,9 +34,9 @@ class Pacman : public Entity {
         behavior.reset(new PacmanDefaultBehavior{*this});
         attacker = false;
     }
-    Pacman(int &points, int x, int y) : Pacman{points} {
-        texture.x = x;
-        texture.y = y;
+    Pacman(int &points, const SDL_Point &pos) : Pacman{points} {
+        texture.x = pos.x;
+        texture.y = pos.y;
     }
 
     void handleEvent(SDL_Event &e);

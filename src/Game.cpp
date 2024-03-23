@@ -138,9 +138,8 @@ void Game::run() {
     SDL_Event e;
     Board board("./levels/level1.txt");
 
-    Pacman pacman(get_points_ref(), board.getPacmanStart().x,
-                  board.getPacmanStart().y);
-    Ghost ghost(board.getGhostStart().x, board.getGhostStart().y);
+    Pacman pacman(get_points_ref(), board.getPacmanStart());
+    Ghost ghost(board.getGhostStart());
 
     TextTexture theEndText;
     theEndText.loadText("Game over", white);

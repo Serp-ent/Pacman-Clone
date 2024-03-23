@@ -21,9 +21,9 @@ class Ghost : public Entity {
         attacker = true;
         behavior.reset(new RedGhostBehavior(*this));
     }
-    Ghost(int x, int y) : Ghost{} {
-        texture.x = x;
-        texture.y = y;
+    Ghost(const SDL_Point &pos) : Ghost{} {
+        texture.x = pos.x;
+        texture.y = pos.y;
     }
 
     virtual void move(Board &b, Entity &e) override;

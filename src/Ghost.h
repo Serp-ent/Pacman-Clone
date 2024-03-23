@@ -11,7 +11,7 @@ class Board;
 class Ghost : public Entity {
   public:
     // TODO: clips should be in one array accessed by macros for each state
-    static constexpr int frames = 10;
+    static constexpr int frames = 8;
     static SDL_Rect spriteClips[frames];
     static constexpr int runningAwayFrames = 2;
     static SDL_Rect runningAwayClips[runningAwayFrames];

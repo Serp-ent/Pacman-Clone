@@ -79,10 +79,14 @@ class Ghost : public Entity {
     bool isBlinking() { return blink; }
 
   private:
-    friend class DumbGhostBehavior;
     friend class GhostDeathBehavior;
-    friend class RedGhostBehavior;
     friend class GhostRunAwayBehavior;
+
+    friend class GhostAttackBehavior;
+    friend class PinkGhostBehavior;
+    friend class RedGhostBehavior;
+    friend class OrangeGhostBehavior;
+    friend class DumbGhostBehavior;
 
     // TODO: add sprite
     int directionSprite = 0;

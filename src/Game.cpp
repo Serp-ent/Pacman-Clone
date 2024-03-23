@@ -146,7 +146,7 @@ void Game::run() {
     Board board("./levels/level1.txt");
 
     Pacman pacman(get_points_ref(), board.getPacmanStart());
-    Ghost ghost(Ghost::Type::red, board.getGhostStart());
+    Ghost ghost(Ghost::Type::orange, board.getGhostStart());
 
     TextTexture theEndText;
     theEndText.loadText("Game over", white);
@@ -228,7 +228,7 @@ void Game::run() {
         while (SDL_PollEvent(&e)) {
             if (e.type == SDL_QUIT) {
                 state = State::quit;
-
+                continue;
             } else if (e.type == SDL_KEYDOWN) {
                 switch (e.key.keysym.sym) {
                 case SDLK_ESCAPE:

@@ -189,24 +189,25 @@ void DumbGhostBehavior::move(Board &b, Entity &pacman) {
         int direction = random();
         // TODO: velocity
         // TODO: get rid of magic constants
+        //
         ghost.velocity_y = 0;
         ghost.velocity_x = 0;
         switch (direction % 4) {
         case 0:
-            ghost.directionSprite = 0;
-            ghost.velocity_x += 2;
+            ghost.directionSprite = Entity::right;
+            ghost.velocity_x += Entity::velocity;
             break;
         case 1:
-            ghost.directionSprite = 2;
-            ghost.velocity_x -= 2;
+            ghost.directionSprite = Entity::left;
+            ghost.velocity_x -= Entity::velocity;
             break;
         case 2:
-            ghost.directionSprite = 4;
-            ghost.velocity_y -= 2;
+            ghost.directionSprite = Entity::up;
+            ghost.velocity_y -= Entity::velocity;
             break;
         case 3:
-            ghost.directionSprite = 6;
-            ghost.velocity_y += 2;
+            ghost.directionSprite = Entity::down;
+            ghost.velocity_y += Entity::velocity;
             break;
         }
 
@@ -394,6 +395,33 @@ void GhostDeathBehavior::move(Board &b, Entity &e) {
     }
 }
 
+void CyanGhostBehavior::move(Board &b, Entity &pacman) {
+    static int i = 0;
+    ++i;
+    if (i > 100) {
+        printf("Cyan::Behavior ghost not implemented\n");
+        i = 0;
+    }
+}
+
+void PinkGhostBehavior::move(Board &b, Entity &pacman) {
+    static int i = 0;
+    ++i;
+    if (i > 100) {
+        printf("Pink::Behavior ghost not implemented\n");
+        i = 0;
+    }
+}
+
+void OrangeGhostBehavior::move(Board &b, Entity &pacman) {
+    static int i = 0;
+    ++i;
+    if (i > 100) {
+        printf("Orange::Behavior ghost not implemented\n");
+        i = 0;
+    }
+}
+
 void RedGhostBehavior::move(Board &b, Entity &pacman) {
     // TODO: ghost should move smoothly
     struct BoxPos {
@@ -418,17 +446,17 @@ void RedGhostBehavior::move(Board &b, Entity &pacman) {
     ghost.velocity_y = 0;
     ghost.velocity_x = 0;
     if (dest->x > ghostPos.x) {
-        ghost.directionSprite = 0;
-        ghost.velocity_x += 2;
+        ghost.directionSprite = Entity::right;
+        ghost.velocity_x += Entity::velocity;
     } else if (dest->x < ghostPos.x) {
-        ghost.directionSprite = 2;
-        ghost.velocity_x -= 2;
+        ghost.directionSprite = Entity::left;
+        ghost.velocity_x -= Entity::velocity;
     } else if (dest->y < ghostPos.y) {
-        ghost.directionSprite = 4;
-        ghost.velocity_y -= 2;
+        ghost.directionSprite = Entity::up;
+        ghost.velocity_y -= Entity::velocity;
     } else if (dest->y > ghostPos.y) {
-        ghost.directionSprite = 6;
-        ghost.velocity_y += 2;
+        ghost.directionSprite = Entity::down;
+        ghost.velocity_y += Entity::velocity;
     }
 
     if (dest->x == ghostPos.x && dest->y == ghostPos.y) {
@@ -567,17 +595,17 @@ void GhostRunAwayBehavior::move(Board &b, Entity &pacman) {
     ghost.velocity_y = 0;
     ghost.velocity_x = 0;
     if (dest->x > ghostPos.x) {
-        ghost.directionSprite = 0;
-        ghost.velocity_x += 2;
+        ghost.directionSprite = Entity::right;
+        ghost.velocity_x += Entity::velocity;
     } else if (dest->x < ghostPos.x) {
-        ghost.directionSprite = 2;
-        ghost.velocity_x -= 2;
+        ghost.directionSprite = Entity::left;
+        ghost.velocity_x -= Entity::velocity;
     } else if (dest->y < ghostPos.y) {
-        ghost.directionSprite = 4;
-        ghost.velocity_y -= 2;
+        ghost.directionSprite = Entity::up;
+        ghost.velocity_y -= Entity::velocity;
     } else if (dest->y > ghostPos.y) {
-        ghost.directionSprite = 6;
-        ghost.velocity_y += 2;
+        ghost.directionSprite = Entity::down;
+        ghost.velocity_y += Entity::velocity;
     }
 
     SDL_Rect border{b.getPos().x, b.getPos().y, b.columns() * Box::size,

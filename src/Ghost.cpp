@@ -92,23 +92,20 @@ void Ghost::clearState(bool death) {
     // }
 }
 
-std::unique_ptr<Behavior> Ghost::getGhostBehavior(Ghost &ghost) {
+std::unique_ptr<Behavior> Ghost::getGhostBehaviorColorBased(Ghost &ghost) {
     std::unique_ptr<Behavior> behavior;
     switch (ghost.ghostColor) {
     case Type::red:
         behavior = std::make_unique<RedGhostBehavior>(ghost);
         break;
     case Type::pink:
-        printf("[ERROR] pink Ghots not implemented\n");
-        behavior = std::make_unique<RedGhostBehavior>(ghost);
+        behavior = std::make_unique<PinkGhostBehavior>(ghost);
         break;
     case Type::cyan:
-        printf("[ERROR] cyan Ghots not implemented\n");
-        behavior = std::make_unique<RedGhostBehavior>(ghost);
+        behavior = std::make_unique<CyanGhostBehavior>(ghost);
         break;
     case Type::orange:
-        printf("[ERROR] orange Ghots not implemented\n");
-        behavior = std::make_unique<RedGhostBehavior>(ghost);
+        behavior = std::make_unique<OrangeGhostBehavior>(ghost);
         break;
     case Type::ghostNumber:
         printf("[ERROR] ghost number provided as argument\n");

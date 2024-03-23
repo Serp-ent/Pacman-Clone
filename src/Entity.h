@@ -14,6 +14,12 @@ class Entity {
     // default velocity
     // TODO: change name to speed
     static constexpr int velocity = 2;
+    enum Direction {
+        right = 0,
+        left = 2,
+        up = 4,
+        down = 6,
+    };
 
     virtual ~Entity() {}
     virtual void move(Board &b, Entity &e) = 0;
@@ -28,6 +34,21 @@ class Entity {
     void setPos(const SDL_Point &p) {
         texture.x = p.x;
         texture.y = p.y;
+    }
+
+    const Direction getDirection() {
+        if (velocity_x < 0)
+            return Direction::left;
+        if (velocity_x > 0)
+            return Direction::right;
+        if (velocity_y < 0)
+            return Direction::up;
+        if (velocity_y > 0)
+            return Direction::down;
+        // default
+        printf("[WARNING] Entity::getDirection() Got direction when both "
+               "velocity are 0 returning right as default one\n");
+        return Direction::right;
     }
 
     bool wasKilled() const { return isDead; }

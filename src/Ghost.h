@@ -7,6 +7,7 @@
 #include <SDL2/SDL_rect.h>
 #include <array>
 #include <memory>
+#include <stdexcept>
 
 class Pacman;
 class Board;
@@ -32,17 +33,22 @@ class Ghost : public Entity {
     static SDL_Rect runningAwayClips[runningAwayFrames];
 
     Ghost(Type t) : ghostColor(t) {
+        if (ghostColor == Type::ghostNumber) {
+            printf("[ERROR]: Ghost cann't have type of ghostNumber\n");
+            throw std::runtime_error{"Ghost have type Type::ghostNumber"};
+        }
+
         currRect = &spriteClips[ghostColor][directionSprite];
         attacker = true;
 
-        behavior = getGhostBehavior(*this);
+        behavior = getGhostBehaviorColorBased(*this);
     }
     Ghost(Type t, const SDL_Point &pos) : Ghost{t} {
         texture.x = pos.x;
         texture.y = pos.y;
     }
 
-    static std::unique_ptr<Behavior> getGhostBehavior(Ghost &ghost);
+    static std::unique_ptr<Behavior> getGhostBehaviorColorBased(Ghost &ghost);
 
     virtual void move(Board &b, Entity &e) override;
     virtual void render() override;

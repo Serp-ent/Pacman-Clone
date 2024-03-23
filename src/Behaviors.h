@@ -47,6 +47,42 @@ class RedGhostBehavior : public Behavior {
     std::vector<Graph::BoxNode *> path;
 };
 
+class PinkGhostBehavior : public Behavior {
+  public:
+    PinkGhostBehavior(Ghost &g) : ghost(g) {}
+    virtual void move(Board &b, Entity &e) override;
+
+    void resetPath() { path.clear(); }
+
+  private:
+    Ghost &ghost;
+    std::vector<Graph::BoxNode *> path;
+};
+
+class OrangeGhostBehavior : public Behavior {
+  public:
+    OrangeGhostBehavior(Ghost &g) : ghost(g) {}
+    virtual void move(Board &b, Entity &e) override;
+
+    void resetPath() { path.clear(); }
+
+  private:
+    Ghost &ghost;
+    std::vector<Graph::BoxNode *> path;
+};
+
+class CyanGhostBehavior : public Behavior {
+  public:
+    CyanGhostBehavior(Ghost &g) : ghost(g) {}
+    virtual void move(Board &b, Entity &e) override;
+
+    void resetPath() { path.clear(); }
+
+  private:
+    Ghost &ghost;
+    std::vector<Graph::BoxNode *> path;
+};
+
 // INFO: testing purpose only moves in random direction
 class DumbGhostBehavior : public Behavior {
   public:

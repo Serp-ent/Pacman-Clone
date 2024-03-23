@@ -41,6 +41,7 @@ class RedGhostBehavior : public Behavior {
     virtual void move(Board &b, Entity &e) override;
 
     void resetPath() { path.clear(); }
+    const std::vector<Graph::BoxNode *> &getPath() { return path; }
 
   private:
     Ghost &ghost;

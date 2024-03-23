@@ -2,6 +2,7 @@
 
 #include "Behaviors.h"
 #include "Board.h"
+#include <SDL2/SDL_rect.h>
 #include <SDL2/SDL_render.h>
 #include <array>
 #include <cstdio>
@@ -10,6 +11,24 @@ std::array<Ghost::GhostClips, Ghost::Type::ghostNumber> Ghost::spriteClips;
 SDL_Rect Ghost::runningAwayClips[Ghost::runningAwayFrames];
 
 void Ghost::move(Board &b, Entity &pacman) { behavior->move(b, pacman); }
+
+void Ghost::renderPath(const SDL_Point &boardPos) {
+    RedGhostBehavior *b = dynamic_cast<RedGhostBehavior *>(behavior.get());
+    if (!b) {
+        return;
+    }
+
+    SDL_SetRenderDrawColor(Game::gRenderer, 255, 0, 0, 0xFF);
+    for (auto p : b->getPath()) {
+        // TODO: function that changes from Box cordinates to pixels
+        // and from pixels to box coordinates
+        SDL_Rect path{boardPos.x + p->x * Box::size + Box::size / 2 - 5 / 2,
+                      boardPos.y + p->y * Box::size + Box::size / 2 - 5 / 2, 5,
+                      5};
+        SDL_RenderFillRect(Game::gRenderer, &path);
+    }
+}
+
 void Ghost::render() {
     // // more rendering
     // SDL_SetRenderDrawColor(Game::gRenderer, 0xFF, 0, 0, 0xAA);
@@ -17,6 +36,7 @@ void Ghost::render() {
 
     // SDL_SetRenderDrawColor(Game::gRenderer, 0, 0, 0, 0xFF);
     // SDL_RenderDrawRect(Game::gRenderer, &texture);
+
     static int frame = 0;
 
     // TODO: frame speed scale

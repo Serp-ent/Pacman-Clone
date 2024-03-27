@@ -1,7 +1,12 @@
 #include "utils.h"
 
 #include "Board.h"
+#include <random>
 #include "Box.h"
+
+int manhattanDistance(int x1, int y1, int x2, int y2) {
+    return std::abs(x1 - x2) + std::abs(y1 - y2);
+}
 
 bool checkCollision(const SDL_Rect &a, const SDL_Rect &b) {
     // The sides of the rectangles
@@ -83,4 +88,18 @@ Box *pointIsReached(SDL_Rect &p, Board &b, Box::Type boxType) {
     }
 
     return nullptr;
+}
+
+int getRandomNumber(int min, int max) {
+    // Create a random device to seed the random number generator
+    std::random_device rd;
+
+    // Create a random number generator
+    std::mt19937 gen(rd());
+
+    // Create a distribution to define the range of random numbers
+    std::uniform_int_distribution<int> dis(min, max - 1);
+
+    // Generate and return a random number
+    return dis(gen);
 }

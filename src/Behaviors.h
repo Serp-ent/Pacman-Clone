@@ -66,6 +66,9 @@ class OrangeGhostBehavior : public GhostAttackBehavior {
   public:
     OrangeGhostBehavior(Ghost &g) : GhostAttackBehavior{g} {}
     virtual void move(Board &b, Entity &e) override;
+
+  private:
+    bool scared = false;
 };
 
 class CyanGhostBehavior : public GhostAttackBehavior {

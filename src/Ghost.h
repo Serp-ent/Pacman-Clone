@@ -43,6 +43,7 @@ class Ghost : public Entity {
 
         behavior = getGhostBehaviorColorBased(*this);
     }
+
     Ghost(Type t, const SDL_Point &pos) : Ghost{t} {
         texture.x = pos.x;
         texture.y = pos.y;

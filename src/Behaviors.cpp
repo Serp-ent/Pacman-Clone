@@ -418,11 +418,123 @@ void GhostDeathBehavior::move(Board &b, Entity &e) {
 }
 
 void CyanGhostBehavior::move(Board &b, Entity &pacman) {
-    static int i = 0;
-    ++i;
-    if (i > 100) {
-        printf("Cyan::Behavior ghost not implemented\n");
-        i = 0;
+    struct BoxPos {
+        int x, y;
+    };
+    BoxPos ghostPos = {
+        (ghost.getPos().x - b.getPos().x + Ghost::width / 2) / Box::size,
+        (ghost.getPos().y - b.getPos().y + Ghost::height / 2) / Box::size,
+    };
+
+    if (path.empty()) {
+        BoxPos basePos = {
+            (pacman.getPos().x - b.getPos().x) / Box::size,
+            (pacman.getPos().y - b.getPos().y) / Box::size,
+        };
+
+        constexpr int tileDistance = 8;
+        BoxPos targetPos = basePos;
+        switch (pacman.getDirection()) {
+        case Entity::Direction::up:
+            targetPos.y -= tileDistance;
+            break;
+        case Entity::Direction::down:
+            targetPos.y += tileDistance;
+            break;
+        case Entity::Direction::left:
+            targetPos.x -= tileDistance;
+            break;
+        case Entity::Direction::right:
+            targetPos.x += tileDistance;
+            break;
+        }
+
+        bool ambushMode = manhattanDistance(ghostPos.x, ghostPos.y, basePos.x,
+                                            basePos.y) < tileDistance;
+        bool targetReachable =
+            (targetPos.x >= 0 && targetPos.x < b.columns()) &&
+            (targetPos.y >= 0 && targetPos.y < b.rows()) &&
+            (b.getBox(targetPos.x, targetPos.y).getType() != Box::Type::wall);
+        if (ambushMode && targetReachable) {
+            path = breadthFirstSearch(b.graph, ghostPos.x, ghostPos.y,
+                                      targetPos.x, targetPos.y);
+        } else {
+            path = breadthFirstSearch(b.graph, ghostPos.x, ghostPos.y,
+                                      basePos.x, basePos.y);
+        }
+    }
+
+    Graph::BoxNode *dest = path.back();
+    ghost.velocity_y = 0;
+    ghost.velocity_x = 0;
+    if (dest->x > ghostPos.x) {
+        ghost.directionSprite = Entity::right;
+        ghost.velocity_x += Entity::velocity;
+    } else if (dest->x < ghostPos.x) {
+        ghost.directionSprite = Entity::left;
+        ghost.velocity_x -= Entity::velocity;
+    } else if (dest->y < ghostPos.y) {
+        ghost.directionSprite = Entity::up;
+        ghost.velocity_y -= Entity::velocity;
+    } else if (dest->y > ghostPos.y) {
+        ghost.directionSprite = Entity::down;
+        ghost.velocity_y += Entity::velocity;
+    }
+
+    if (dest->x == ghostPos.x && dest->y == ghostPos.y) {
+        path.pop_back();
+    }
+
+    SDL_Rect border{b.getPos().x, b.getPos().y, b.columns() * Box::size,
+                    b.rows() * Box::size};
+
+    // TODO: fix jumping
+    // TODO: fix moving inside on rectnagle when there is border
+    // e.g. can move up and down when there are upper and lower boxes
+    // // maybe keep surrounding 9 box that surrounds pacman
+    // and check if we can enter them
+    SDL_Point texture_center = {ghost.texture.x + Pacman::width / 2,
+                                ghost.texture.y + Pacman::height / 2};
+
+    // TODO: remove code dupplication here and in pacman class
+    int i = (texture_center.x - b.getPos().x) / Box::size;
+    int j = (texture_center.y - b.getPos().y) / Box::size;
+    if (ghost.velocity_x) {
+        ghost.texture.x += ghost.velocity_x;
+        // fix y position
+        SDL_Point curr_box_center = {
+            b.getPos().x + i * Box::size + Box::size / 2,
+            b.getPos().y + j * Box::size + Box::size / 2};
+        int correct_y = curr_box_center.y - ghost.texture.h / 2;
+        ghost.texture.y = correct_y;
+
+        if ((ghost.texture.x < border.x) ||
+            (ghost.texture.x + ghost.texture.w > border.x + border.w) ||
+            checkCollision(ghost.texture, b, Box::Type::wall)) {
+            ghost.texture.x -= ghost.velocity_x;
+        }
+    } else if (ghost.velocity_y) {
+        ghost.texture.y += ghost.velocity_y;
+
+        // fix x position
+        SDL_Point curr_box_center = {
+            b.getPos().x + i * Box::size + Box::size / 2,
+            b.getPos().y + j * Box::size + Box::size / 2};
+        int correct_x = curr_box_center.x - ghost.texture.w / 2;
+        ghost.texture.x = correct_x;
+
+        if ((ghost.texture.y < border.y) ||
+            (ghost.texture.y + ghost.texture.h) > border.y + border.h ||
+            checkCollision(ghost.texture, b, Box::Type::wall)) {
+            ghost.texture.y -= ghost.velocity_y;
+        }
+    }
+
+    // Make collision only point so textures can overlap
+    SDL_Point collison{ghost.texture.x + ghost.texture.w / 2,
+                       ghost.texture.y + ghost.texture.h / 2};
+    if (SDL_PointInRect(&collison, &pacman.getCollision())) {
+        pacman.clearState(true);
     }
 }
 
@@ -459,6 +571,8 @@ void PinkGhostBehavior::move(Board &b, Entity &pacman) {
         }
 
         bool targetReachable =
+            (targetPos.x >= 0 && targetPos.x < b.columns()) &&
+            (targetPos.y >= 0 && targetPos.y < b.rows()) &&
             (b.getBox(targetPos.x, targetPos.y).getType() != Box::Type::wall);
         if (targetReachable) {
             path = breadthFirstSearch(b.graph, ghostPos.x, ghostPos.y,
@@ -584,8 +698,6 @@ void OrangeGhostBehavior::move(Board &b, Entity &pacman) {
 
             const BoxPos *pos =
                 &safezones[getRandomNumber(0, safezones.size())];
-            b.getBox(pos->x, pos->y).setType(Box::Type::empty);
-            printf("Run away to (%d, %d)\n", pos->x, pos->y);
             path = breadthFirstSearch(b.graph, ghostPos.x, ghostPos.y, pos->x,
                                       pos->y);
             scared = true;

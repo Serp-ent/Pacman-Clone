@@ -87,6 +87,7 @@ class Ghost : public Entity {
     friend class PinkGhostBehavior;
     friend class RedGhostBehavior;
     friend class OrangeGhostBehavior;
+    friend class CyanGhostBehavior;
     friend class DumbGhostBehavior;
 
     // TODO: add sprite

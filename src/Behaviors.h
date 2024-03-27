@@ -75,6 +75,9 @@ class CyanGhostBehavior : public GhostAttackBehavior {
   public:
     CyanGhostBehavior(Ghost &g) : GhostAttackBehavior{g} {}
     virtual void move(Board &b, Entity &e) override;
+
+  private:
+    bool ambush = true;
 };
 
 // INFO: testing purpose only moves in random direction

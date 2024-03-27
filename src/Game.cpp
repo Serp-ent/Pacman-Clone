@@ -146,7 +146,7 @@ void Game::run() {
     Board board("./levels/level1.txt");
 
     Pacman pacman(get_points_ref(), board.getPacmanStart());
-    Ghost ghost(Ghost::Type::orange, board.getGhostStart());
+    Ghost ghost(Ghost::Type::cyan, board.getGhostStart());
 
     TextTexture theEndText;
     theEndText.loadText("Game over", white);

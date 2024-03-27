@@ -9,6 +9,55 @@ class Box {
   public:
     static constexpr int size = Pacman::height;
     enum class Type : int8_t { wall, point, super_point, empty };
+    enum WallType {
+        MapTopRightCorner,
+        MapTopLeftCorner,
+        MapRightWall,
+        MapLeftWall,
+        MapBottomRightCorner,
+        MapBottomLeftCorner,
+        Junk1,
+        Junk2,
+        Junk3,
+        Junk4,
+        Junk5,
+        MapTopWall,
+        MapTopWall_v2, // ???
+        MapBottomWall,
+        MapBottomWall_v2, // ???
+        BottomWall,
+        BottomWall_v2, // ???
+        Junk9,
+        Junk10,
+        Junk11,
+        TopWall,
+        TopWall_v2, // ???
+        ConcaveTopRight,
+        ConcaveTopLeft,
+        LeftWall,
+        RightWall,
+        ConcaveBottomLeft,
+        ConcaveBottomRight,
+        Junk15,
+        Junk21,
+        Junk22,
+        Junk23,
+        Junk24,
+        Junk25,
+        TopLeftCorner,
+        TopRightCorner,
+        BottomLeftCorner,
+        BottomRightCorner,
+        Junk30,
+        Junk31,
+        Junk32,
+        Junk33,
+        Junk34,
+        Junk35,
+        Junk36,
+        Junk37,
+        InsideWall, // surrouned by walls
+    };
 
     void render(int x, int y);
     void setType(Box::Type t) { type_ = t; };

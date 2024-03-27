@@ -14,7 +14,7 @@
 class Board {
   public:
     static LTexture mapTexture;
-    static constexpr int clipsNumber = 44;
+    static constexpr int clipsNumber = 45;
     static SDL_Rect mapClips[clipsNumber];
 
     Board(int h, int w)
@@ -59,5 +59,7 @@ class Board {
 
     std::vector<Box> board_;
 };
+
+Box::WallType getWallClipBasedOnNeighbours(Board &b, int x, int y);
 
 #endif // !PACMAN_BOARD_H

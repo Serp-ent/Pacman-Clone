@@ -120,7 +120,7 @@ void Game::load_media() {
         pos.x += 1 + 8;
         if ((i + 1) % 16 == 0) {
             pos.x = 0;
-            pos.y = 1 + 8; // 1 means margin between textures
+            pos.y += 1 + 8; // 1 means margin between textures
                            // 8 because textures are size 8px by 8px
         }
     }
@@ -146,7 +146,7 @@ void Game::run() {
     Board board("./levels/level1.txt");
 
     Pacman pacman(get_points_ref(), board.getPacmanStart());
-    Ghost ghost(Ghost::Type::cyan, board.getGhostStart());
+    Ghost ghost(Ghost::Type::orange, board.getGhostStart());
 
     TextTexture theEndText;
     theEndText.loadText("Game over", white);

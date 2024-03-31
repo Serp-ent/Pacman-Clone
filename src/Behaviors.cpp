@@ -58,10 +58,14 @@ void PacmanDefaultBehavior::move(Board &b, Entity &ghost) {
         int correct_y = curr_box_center.y - pacman.texture.h / 2;
         pacman.texture.y = correct_y;
 
-        if ((pacman.texture.x < border.x) ||
-            (pacman.texture.x + pacman.texture.w > border.x + border.w) ||
-            checkCollision(pacman.texture, b, Box::Type::wall)) {
+        if (checkCollision(pacman.texture, b, Box::Type::wall)) {
             pacman.texture.x -= pacman.velocity_x;
+        } else if (pacman.texture.x + pacman.width < border.x) {
+            SDL_Point newPos = {border.x + border.w, pacman.getPos().y};
+            pacman.setPos(newPos);
+        } else if (pacman.texture.x > border.x + border.w) {
+            SDL_Point newPos = {border.x - pacman.width, pacman.getPos().y};
+            pacman.setPos(newPos);
         }
     } else if (pacman.velocity_y) {
         pacman.texture.y += pacman.velocity_y;
@@ -147,10 +151,14 @@ void PacmanSuperPointBehavior::move(Board &b, Entity &ghost) {
         int correct_y = curr_box_center.y - pacman.texture.h / 2;
         pacman.texture.y = correct_y;
 
-        if ((pacman.texture.x < border.x) ||
-            (pacman.texture.x + pacman.texture.w > border.x + border.w) ||
-            checkCollision(pacman.texture, b, Box::Type::wall)) {
+        if (checkCollision(pacman.texture, b, Box::Type::wall)) {
             pacman.texture.x -= pacman.velocity_x;
+        } else if (pacman.texture.x + pacman.width < border.x) {
+            SDL_Point newPos = {border.x + border.w, pacman.getPos().y};
+            pacman.setPos(newPos);
+        } else if (pacman.texture.x > border.x + border.w) {
+            SDL_Point newPos = {border.x - pacman.width, pacman.getPos().y};
+            pacman.setPos(newPos);
         }
     } else if (pacman.velocity_y) {
         pacman.texture.y += pacman.velocity_y;

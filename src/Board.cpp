@@ -76,7 +76,8 @@ Board::Board(const std::string &filename) {
             if (getBox(x, y).getType() == Box::Type::wall) {
                 Box::WallType walltype =
                     getWallClipBasedOnNeighbours(*this, x, y);
-                if (walltype == Box::Junk1) {
+
+                if (walltype == Box::Junk5) {
                     getBox(x, y).setClip(nullptr);
                 } else {
                     getBox(x, y).setClip(&mapClips[walltype]);
@@ -172,30 +173,30 @@ Box::WallType getWallClipBasedOnNeighbours(Board &b, int x, int y) {
     case 0b11011111:
         return Box::WallType::ConcaveBottomRight;
     // **** EXCEPTION FOR GHOST BOX *************************************
-    case 0b01000010:
-    case 0b11000010:
-    case 0b01100010:
-    case 0b01000110:
-    case 0b01000011:
-        return Box::WallType::RightWall;
-    case 0b00001010:
-        return Box::WallType::TopLeftCorner;
-    case 0b00010010:
-        return Box::WallType::TopRightCorner;
-    case 0b01001000:
-        return Box::WallType::BottomLeftCorner;
-    case 0b01010000:
-        return Box::WallType::BottomRightCorner;
-    case 0b00011000:
-    case 0b10011000:
-    case 0b00111000:
-    case 0b00011100:
-    case 0b00011001:
-        return Box::WallType::TopWall;
+    // case 0b01000010:
+    // case 0b11000010:
+    // case 0b01100010:
+    // case 0b01000110:
+    // case 0b01000011:
+    //     return Box::WallType::RightWall;
+    // case 0b00001010:
+    //     return Box::WallType::TopLeftCorner;
+    // case 0b00010010:
+    //     return Box::WallType::TopRightCorner;
+    // case 0b01001000:
+    //     return Box::WallType::BottomLeftCorner;
+    // case 0b01010000:
+    //     return Box::WallType::BottomRightCorner;
+    // case 0b00011000:
+    // case 0b10011000:
+    // case 0b00111000:
+    // case 0b00011100:
+    // case 0b00011001:
+    //     return Box::WallType::TopWall;
     // **************************************************************
     case 0b11111111:
         return Box::WallType::InsideWall;
     }
 
-    return Box::WallType::Junk1;
+    return Box::WallType::Junk5;
 }

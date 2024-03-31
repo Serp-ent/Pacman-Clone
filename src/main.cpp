@@ -17,8 +17,6 @@
 
 // TODO: maybe use a namespace to limit namespace pollution
 
-// TODO: create MENU and HUD
-
 // TODO: create level designer in SDL2 that creates textfile with map
 // TODO: use SDL functions with unique_ptr
 

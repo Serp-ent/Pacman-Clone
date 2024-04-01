@@ -8,7 +8,7 @@
 class Box {
   public:
     static constexpr int size = Pacman::height;
-    enum class Type : int8_t { wall, point, super_point, empty };
+    enum class Type : int8_t { wall, point, super_point, empty, ghostExit };
     enum WallType {
         MapTopRightCorner,
         MapTopLeftCorner,
@@ -32,30 +32,30 @@ class Box {
         Junk11,
         TopWall,
         TopWall_v2, // ???
-        ConcaveTopRight,
-        ConcaveTopLeft,
+        MapLeftWallSingle,
+        MapRightWallSingle,
         LeftWall,
         RightWall,
         ConcaveBottomLeft,
         ConcaveBottomRight,
-        Junk15,
-        Junk21,
-        Junk22,
-        Junk23,
-        Junk24,
-        Junk25,
+        MapBorderOutCorridorRightBottom,
+        MapBorderOutCorridorLeftBottom,
+        MapBorderOutCorridorRightTop,
+        MapBorderOutCorridorLeftTop,
+        GhostExitLeft,
+        GhostExitRight,
         TopLeftCorner,
         TopRightCorner,
         BottomLeftCorner,
         BottomRightCorner,
-        Junk30,
-        Junk31,
+        ConcaveTopRight,
+        ConcaveTopLeft,
         Junk32,
         Junk33,
+        MapConcaveTopLeftUpper,
+        MapConcaveTopRightUpper,
         Junk34,
         Junk35,
-        Junk36,
-        Junk37,
         InsideWall, // surrouned by walls
     };
 

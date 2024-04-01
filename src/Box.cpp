@@ -35,6 +35,9 @@ void Box::render(int x, int y) {
     case Type::empty:
         SDL_SetRenderDrawColor(Game::gRenderer, 0, 0, 0, 0xF);
         break;
+    case Type::ghostExit:
+        SDL_SetRenderDrawColor(Game::gRenderer, 0, 100, 0, 0xF);
+        break;
     }
 
     SDL_RenderFillRect(Game::gRenderer, &r);

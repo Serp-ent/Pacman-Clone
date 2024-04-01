@@ -68,6 +68,9 @@ Board::Board(const std::string &filename) {
             case '-':
                 getBox(x, y).setType(Box::Type::empty);
                 break;
+            case 'o':
+                getBox(x, y).setType(Box::Type::ghostExit);
+                break;
             }
         }
     }
@@ -83,6 +86,14 @@ Board::Board(const std::string &filename) {
                 } else {
                     getBox(x, y).setClip(&mapClips[walltype]);
                 }
+            } else if (getBox(x, y).getType() == Box::Type::ghostExit) {
+                // by default assume its left
+                Box::WallType ghostExitSide = Box::WallType::GhostExitLeft;
+                if (getBox(x - 1, y).getType() == Box::Type::ghostExit) {
+                    ghostExitSide = Box::WallType::GhostExitRight;
+                }
+
+                getBox(x, y).setClip(&mapClips[ghostExitSide]);
             }
         }
     }
@@ -91,39 +102,13 @@ Board::Board(const std::string &filename) {
 }
 
 Box::WallType getWallClipBasedOnNeighbours(Board &b, int x, int y) {
-    if (x == 0) {
-        if (y == 0) {
-            return Box::WallType::MapTopLeftCorner;
-        } else if (y == b.rows() - 1) {
-            return Box::WallType::MapBottomLeftCorner;
-        }
-
-        return Box::WallType::MapLeftWall;
-    }
-    if (x == (b.columns() - 1)) {
-        if (y == 0) {
-            return Box::WallType::MapTopRightCorner;
-        } else if (y == b.rows() - 1) {
-            return Box::WallType::MapBottomRightCorner;
-        }
-
-        return Box::WallType::MapRightWall;
-    }
-
-    if (y == 0) {
-        return Box::WallType::MapTopWall;
-    }
-    if (y == (b.rows() - 1)) {
-        return Box::WallType::MapBottomWall;
-    }
-
-    //*************************************************************
-
-    // TODO: different algorithm (try traverse along border)
-
     using byte = unsigned char;
+
+    bool isBorder = false;
     byte bitmask = 0;
     int bit = 7; // most significant bit
+
+    isBorder = (x == 0 || x == b.columns() - 1 || y == 0 || y == b.rows() - 1);
     for (int i = y - 1; i < y + 2; ++i) {
         for (int j = x - 1; j < x + 2; ++j) {
             bool isItSelf = (j == x && i == y);
@@ -131,7 +116,12 @@ Box::WallType getWallClipBasedOnNeighbours(Board &b, int x, int y) {
                 continue;
             }
 
-            if (b.getBox(j, i).getType() == Box::Type::wall) {
+            if ((j < 0 || j > b.columns() - 1) || (i < 0 || i > b.rows() - 1)) {
+                --bit;
+                continue;
+            }
+            if (b.getBox(j, i).getType() == Box::Type::wall ||
+                b.getBox(j, i).getType() == Box::Type::ghostExit) {
                 bitmask |= (1 << bit);
             }
 
@@ -139,76 +129,134 @@ Box::WallType getWallClipBasedOnNeighbours(Board &b, int x, int y) {
         }
     }
 
-    switch (bitmask) {
-    case 0b00001011:
-        return Box::WallType::TopLeftCorner;
-    case 0b00010110:
-        return Box::WallType::TopRightCorner;
-    case 0b01101000:
-        return Box::WallType::BottomLeftCorner;
-    case 0b11010000:
-        return Box::WallType::BottomRightCorner;
-    case 0b11111000:
-    case 0b11111001:
-        return Box::WallType::BottomWall;
-    case 0b11111100:
-        // if (b.getBox(x - 1, y).getClip() == Box::MapLeftWall) {
-        //     return Box::WallType::MapConcaveTopLeft;
-        // }
-        return Box::WallType::BottomWall;
-    case 0b00011111:
-        // close to concave box
-    case 0b00111111:
-    case 0b10011111:
-        return Box::WallType::TopWall;
-    case 0b01101011:
-    case 0b11101011:
-    case 0b01101111:
-        return Box::WallType::LeftWall;
-    case 0b11010110:
-    case 0b11110110:
-    case 0b11010111:
-        return Box::WallType::RightWall;
-    case 0b11111110:
-        return Box::WallType::ConcaveTopLeft;
-    case 0b11111011:
-        return Box::WallType::ConcaveTopRight;
-    case 0b01111111:
-        return Box::WallType::ConcaveBottomLeft;
-    case 0b11011111:
-        return Box::WallType::ConcaveBottomRight;
-    // **** EXCEPTION FOR GHOST BOX *************************************
-    case 0b00001010:
-        return Box::WallType::TopLeftCorner;
-    case 0b00010010:
-        return Box::WallType::TopRightCorner;
-    case 0b01001000:
-        return Box::WallType::BottomLeftCorner;
-    case 0b01010000:
-        return Box::WallType::BottomRightCorner;
-    //****************************************************
-    case 0b00011000:
-        return b.getBox(x - 1, y).getClip();
-    case 0b00011100:
-    case 0b00011001:
-        return Box::WallType::TopWall;
-    case 0b00111000:
-    case 0b10011000:
-        return Box::WallType::BottomWall;
+    // TODO: refactor
+    // TODO: fix magic junk5 variable
+    if (isBorder) {
+        switch (bitmask) {
+        case 0b00001010:
+            return Box::WallType::MapTopLeftCorner;
+        case 0b00010010:
+            return Box::WallType::MapTopRightCorner;
+        case 0b01001000:
+            return Box::WallType::MapBottomLeftCorner;
+        case 0b01010000:
+            return Box::WallType::MapBottomRightCorner;
+        //****************************************************
+        case 0b00011000:
+            return b.getBox(x - 1, y).getClip();
+        case 0b00011100:
+        case 0b00011001:
+            return Box::WallType::MapTopWall;
+        case 0b00111000:
+        case 0b10011000:
+            return Box::WallType::MapBottomWall;
 
-    case 0b01000010: { // specify if its left or right wall based on upper wall
-        return b.getBox(x, y - 1).getClip();
-    }
-    case 0b01100010:
-    case 0b01000011:
-        return Box::WallType::LeftWall;
-    case 0b01000110:
-    case 0b11000010:
-        return Box::WallType::RightWall;
-    // **************************************************************
-    case 0b11111111:
-        return Box::WallType::InsideWall;
-    }
+        case 0b01000010: { // specify if its left or right wall based on upper
+                           // wall
+            return b.getBox(x, y - 1).getClip();
+        }
+        case 0b01100010:
+        case 0b01000011:
+            return Box::WallType::MapLeftWall;
+        case 0b01000110:
+        case 0b11000010:
+            return Box::WallType::MapRightWall;
+        case 0b01001011:
+            return Box::WallType::MapConcaveBottomLeft;
+        case 0b01010110:
+            return Box::WallType::MapConcaveBottomRight;
+        case 0b11010010:
+            return Box::WallType::MapConcaveTopRight;
+        case 0b01101010:
+            return Box::WallType::MapConcaveTopLeft;
+        case 0b01101011:
+            return Box::WallType::MapLeftWallSingle;
+        case 0b11010110:
+            return Box::WallType::MapRightWallSingle;
+        case 0b00011011:
+            return Box::WallType::MapConcaveTopRightUpper;
+        case 0b00011110:
+            return Box::WallType::MapConcaveTopLeftUpper;
+        case 0b01101000:
+            return Box::WallType::MapBorderOutCorridorLeftTop;
+        case 0b00010110:
+            return Box::WallType::MapBorderOutCorridorRightBottom;
+        case 0b00001011:
+            return Box::WallType::MapBorderOutCorridorLeftBottom;
+        case 0b11010000:
+            return Box::WallType::MapBorderOutCorridorRightTop;
+        }
+    } else {
+        switch (bitmask) {
+        case 0b00001011:
+            return Box::WallType::TopLeftCorner;
+        case 0b00010110:
+            return Box::WallType::TopRightCorner;
+        case 0b01101000:
+            return Box::WallType::BottomLeftCorner;
+        case 0b11010000:
+            return Box::WallType::BottomRightCorner;
+        case 0b11111000:
+        case 0b11111001:
+        case 0b11111100:
+            return Box::WallType::BottomWall;
+        case 0b00011111:
+            // close to concave box
+        case 0b00111111:
+        case 0b10011111:
+            return Box::WallType::TopWall;
+        case 0b01101011:
+        case 0b11101011:
+        case 0b01101111:
+            return Box::WallType::LeftWall;
+        case 0b11010110:
+        case 0b11110110:
+        case 0b11010111:
+            return Box::WallType::RightWall;
+        case 0b11111110:
+            return Box::WallType::ConcaveTopLeft;
+        case 0b11111011:
+            return Box::WallType::ConcaveTopRight;
+        case 0b01111111:
+            return Box::WallType::ConcaveBottomLeft;
+        case 0b11011111:
+            return Box::WallType::ConcaveBottomRight;
+        // **** EXCEPTION FOR GHOST BOX *************************************
+        case 0b00001010:
+            return Box::WallType::TopLeftCorner;
+        case 0b00010010:
+            return Box::WallType::TopRightCorner;
+        case 0b01001000:
+            return Box::WallType::BottomLeftCorner;
+        case 0b01010000:
+            return Box::WallType::BottomRightCorner;
+        //****************************************************
+        case 0b00011000:
+            if (b.getBox(x - 1, y).getType() == Box::Type::ghostExit) {
+                return b.getBox(x - 3, y).getClip();
+            }
+            return b.getBox(x - 1, y).getClip();
+        case 0b00011100:
+        case 0b00011001:
+            return Box::WallType::TopWall;
+        case 0b00111000:
+        case 0b10011000:
+            return Box::WallType::BottomWall;
 
+        case 0b01000010: { // specify if its left or right wall based on upper
+                           // wall
+            return b.getBox(x, y - 1).getClip();
+        }
+        case 0b01100010:
+        case 0b01000011:
+            return Box::WallType::LeftWall;
+        case 0b01000110:
+        case 0b11000010:
+            return Box::WallType::RightWall;
+        // **************************************************************
+        case 0b11111111:
+            return Box::WallType::InsideWall;
+        }
+    }
     return Box::WallType::Junk5;
 }

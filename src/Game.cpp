@@ -121,7 +121,7 @@ void Game::load_media() {
         if ((i + 1) % 16 == 0) {
             pos.x = 0;
             pos.y += 1 + 8; // 1 means margin between textures
-                           // 8 because textures are size 8px by 8px
+                            // 8 because textures are size 8px by 8px
         }
     }
 
@@ -276,7 +276,12 @@ void Game::run() {
         }
 
         if (state == State::paused) {
+            board.render();
+
+            pacman.render();
+            ghost.render();
             menu->renderMenu();
+
             SDL_RenderPresent(Game::gRenderer);
             ++frames;
             continue;

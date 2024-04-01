@@ -39,3 +39,7 @@ void Box::render(int x, int y) {
 
     SDL_RenderFillRect(Game::gRenderer, &r);
 };
+
+Box::WallType Box::getClip() {
+    return static_cast<Box::WallType>(currClip - Board::mapClips);
+}

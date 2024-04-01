@@ -64,6 +64,7 @@ class Box {
     Type getType() const { return type_; }
 
     void setClip(SDL_Rect *clip) { currClip = clip; }
+    Box::WallType getClip();
 
   private:
     SDL_Rect *currClip = nullptr;

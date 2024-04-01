@@ -1,4 +1,5 @@
 #include "Board.h"
+#include "Box.h"
 #include "Game.h"
 #include <cstdio>
 #include <fstream>
@@ -149,7 +150,11 @@ Box::WallType getWallClipBasedOnNeighbours(Board &b, int x, int y) {
         return Box::WallType::BottomRightCorner;
     case 0b11111000:
     case 0b11111001:
+        return Box::WallType::BottomWall;
     case 0b11111100:
+        // if (b.getBox(x - 1, y).getClip() == Box::MapLeftWall) {
+        //     return Box::WallType::MapConcaveTopLeft;
+        // }
         return Box::WallType::BottomWall;
     case 0b00011111:
         // close to concave box
@@ -173,26 +178,33 @@ Box::WallType getWallClipBasedOnNeighbours(Board &b, int x, int y) {
     case 0b11011111:
         return Box::WallType::ConcaveBottomRight;
     // **** EXCEPTION FOR GHOST BOX *************************************
-    // case 0b01000010:
-    // case 0b11000010:
-    // case 0b01100010:
-    // case 0b01000110:
-    // case 0b01000011:
-    //     return Box::WallType::RightWall;
-    // case 0b00001010:
-    //     return Box::WallType::TopLeftCorner;
-    // case 0b00010010:
-    //     return Box::WallType::TopRightCorner;
-    // case 0b01001000:
-    //     return Box::WallType::BottomLeftCorner;
-    // case 0b01010000:
-    //     return Box::WallType::BottomRightCorner;
-    // case 0b00011000:
-    // case 0b10011000:
-    // case 0b00111000:
-    // case 0b00011100:
-    // case 0b00011001:
-    //     return Box::WallType::TopWall;
+    case 0b00001010:
+        return Box::WallType::TopLeftCorner;
+    case 0b00010010:
+        return Box::WallType::TopRightCorner;
+    case 0b01001000:
+        return Box::WallType::BottomLeftCorner;
+    case 0b01010000:
+        return Box::WallType::BottomRightCorner;
+    //****************************************************
+    case 0b00011000:
+        return b.getBox(x - 1, y).getClip();
+    case 0b00011100:
+    case 0b00011001:
+        return Box::WallType::TopWall;
+    case 0b00111000:
+    case 0b10011000:
+        return Box::WallType::BottomWall;
+
+    case 0b01000010: { // specify if its left or right wall based on upper wall
+        return b.getBox(x, y - 1).getClip();
+    }
+    case 0b01100010:
+    case 0b01000011:
+        return Box::WallType::LeftWall;
+    case 0b01000110:
+    case 0b11000010:
+        return Box::WallType::RightWall;
     // **************************************************************
     case 0b11111111:
         return Box::WallType::InsideWall;

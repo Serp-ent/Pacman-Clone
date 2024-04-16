@@ -33,6 +33,7 @@ void pickRenderDrawColor(Ghost::Type t) {
 }
 
 void Ghost::renderPath(const SDL_Point &boardPos) {
+    constexpr int pathBoxSize = 7;
     {
         GhostAttackBehavior *b =
             dynamic_cast<GhostAttackBehavior *>(behavior.get());
@@ -42,9 +43,9 @@ void Ghost::renderPath(const SDL_Point &boardPos) {
                 // TODO: function that changes from Box cordinates to pixels
                 // and from pixels to box coordinates
                 SDL_Rect path{
-                    boardPos.x + p->x * Box::size + Box::size / 2 - 5 / 2,
-                    boardPos.y + p->y * Box::size + Box::size / 2 - 5 / 2, 5,
-                    5};
+                    boardPos.x + p->x * Box::size + Box::size / 2 - pathBoxSize / 2,
+                    boardPos.y + p->y * Box::size + Box::size / 2 - pathBoxSize / 2, pathBoxSize,
+                    pathBoxSize};
                 SDL_RenderFillRect(Game::gRenderer, &path);
             }
             return;
@@ -60,9 +61,9 @@ void Ghost::renderPath(const SDL_Point &boardPos) {
                 // TODO: function that changes from Box cordinates to pixels
                 // and from pixels to box coordinates
                 SDL_Rect path{
-                    boardPos.x + p->x * Box::size + Box::size / 2 - 5 / 2,
-                    boardPos.y + p->y * Box::size + Box::size / 2 - 5 / 2, 5,
-                    5};
+                    boardPos.x + p->x * Box::size + Box::size / 2 - pathBoxSize / 2,
+                    boardPos.y + p->y * Box::size + Box::size / 2 - pathBoxSize / 2, pathBoxSize,
+                    pathBoxSize};
                 SDL_RenderFillRect(Game::gRenderer, &path);
             }
             return;
@@ -78,9 +79,9 @@ void Ghost::renderPath(const SDL_Point &boardPos) {
                 // TODO: function that changes from Box cordinates to pixels
                 // and from pixels to box coordinates
                 SDL_Rect path{
-                    boardPos.x + p->x * Box::size + Box::size / 2 - 5 / 2,
-                    boardPos.y + p->y * Box::size + Box::size / 2 - 5 / 2, 5,
-                    5};
+                    boardPos.x + p->x * Box::size + Box::size / 2 - pathBoxSize / 2,
+                    boardPos.y + p->y * Box::size + Box::size / 2 - pathBoxSize / 2, pathBoxSize,
+                    pathBoxSize};
                 SDL_RenderFillRect(Game::gRenderer, &path);
             }
             return;

@@ -5,7 +5,6 @@
 
 #include <SDL2/SDL_rect.h>
 #include <SDL2/SDL_render.h>
-#include <cstdio>
 
 LTexture Pacman::sprite{};
 SDL_Rect Pacman::spriteClips[Pacman::frames];

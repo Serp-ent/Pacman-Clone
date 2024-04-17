@@ -1,6 +1,5 @@
 #ifndef PACMAN_ENTITY_H
 #define PACMAN_ENTITY_H
-#include "SDL2/SDL.h"
 #include <SDL2/SDL_rect.h>
 #include <memory>
 

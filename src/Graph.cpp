@@ -2,7 +2,7 @@
 #include "Behaviors.h"
 #include "Board.h"
 #include <algorithm>
-#include <cstdio>
+#include <queue>
 
 void Graph::setBoard(Board &b) {
     board = &b;

@@ -1,6 +1,5 @@
 #include "Box.h"
 #include "Game.h"
-#include "SDL2/SDL.h"
 
 #include "Board.h"
 #include <SDL2/SDL_render.h>

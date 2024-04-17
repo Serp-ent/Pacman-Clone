@@ -1,8 +1,6 @@
 #ifndef PACMAN_GRAPH_H
 #define PACMAN_GRAPH_H
 
-#include <memory>
-#include <queue>
 #include <unordered_map>
 #include <vector>
 

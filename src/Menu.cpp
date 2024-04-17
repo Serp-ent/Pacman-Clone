@@ -1,5 +1,6 @@
 #include "Menu.h"
 #include "Action.h"
+#include <iostream>
 
 MenuItem::MenuItem(const std::string &label, std::unique_ptr<Action> a)
     : action{std::move(a)} {

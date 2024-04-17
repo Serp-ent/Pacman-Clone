@@ -1,11 +1,8 @@
 #include "Behaviors.h"
-#include <algorithm>
-#include <random>
 #include <unistd.h>
 
 #include "Board.h"
 #include "Graph.h"
-#include "SDL2/SDL.h"
 #include "utils.h"
 #include <SDL2/SDL_rect.h>
 #include <cstdio>

@@ -1,12 +1,10 @@
 #ifndef PACMAN_GAME_H
 #define PACMAN_GAME_H
 
-#include "Box.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
+#include "Timer.h"
 
-#include <iostream>
-#include <stdexcept>
 
 class Game {
   public:
